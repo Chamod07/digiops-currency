@@ -70,7 +70,7 @@ export const getWalletBalanceByWalletAddress = async (walletAddress) => {
     return formattedBalance;
   } catch (error) {
     console.error('Balance fetch error:', error);
-    throw error;
+    return null;
   }
 };
 

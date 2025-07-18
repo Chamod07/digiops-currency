@@ -193,11 +193,8 @@ function Home() {
 
       const tokenBalance = await getWalletBalanceByWalletAddress(walletAddress);
       
-      if (tokenBalance !== null && tokenBalance !== undefined) {
-        const numBalance = parseFloat(tokenBalance);
-        if (!isNaN(numBalance)) {
-          setTokenBalance(tokenBalance);
-        }
+      if (tokenBalance !== null && tokenBalance !== undefined && !isNaN(parseFloat(tokenBalance))) {
+        setTokenBalance(tokenBalance);
       }
     } catch (error) {
       console.error("Background balance fetch error:", error);
