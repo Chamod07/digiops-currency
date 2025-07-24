@@ -31,7 +31,7 @@ function SendAssets() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const [sendWalletAddress, setSendWalletAddress] = useState("");
-  const [sendAmount, setSendAmount] = useState(0);
+  const [sendAmount, setSendAmount] = useState("");
   const [isValidWalletAddress, setIsValidWalletAddress] = useState(false);
   const [isShowErrorMsg, setIsShowErrorMsg] = useState(false);
   const [walletValidationErrorMsg, setWalletValidationErrorMsg] = useState("");
@@ -128,7 +128,8 @@ function SendAssets() {
 
   const handleSendAssetsNext = async () => {
     try {
-      await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, sendAmount);
+      const cleanedAmount = sendAmount.replace(/^0+(?![.])/g, "");
+      await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, cleanedAmount);
       await saveLocalDataAsync(
         STORAGE_KEYS.SENDER_WALLET_ADDRESS,
         sendWalletAddress
