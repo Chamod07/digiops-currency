@@ -262,9 +262,14 @@ function SendAssets() {
                     className="send-coin-input"
                     placeholder="Enter value"
                     suffix="WSO2"
-                    type="number"
+                    type="text"
                     value={sendAmount}
-                    onChange={(e) => setSendAmount(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        setSendAmount(value);
+                      }
+                    }}
                   />
                 </Input.Group>
                 {/* <span className="send-coin-balance">$0.00 USD</span> */}
