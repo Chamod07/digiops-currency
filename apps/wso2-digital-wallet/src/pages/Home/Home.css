@@ -88,6 +88,37 @@
     letter-spacing: 0.5px;
     word-break: break-all;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    display: block;
+}
+
+@media (max-width: 500px) {
+  .recent-activity-address {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    max-width: 100%;
+  }
+}
+
+.no-wallet-wrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  display: block;
+}
+
+@media (max-width: 500px) {
+  .no-wallet-wrap {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    max-width: 100%;
+  }
 }
 .recent-activity-time {
     font-size: 11px;
@@ -96,6 +127,22 @@
 .recent-activity-value {
     font-size: 16px;
     font-weight: 600;
+    display: inline-block;
+    text-align: right;
+    min-width: 90px;
+    max-width: 100%;
+    word-break: break-all;
+    white-space: normal;
+    vertical-align: middle;
+}
+
+.right-align-amount {
+    display: block;
+    text-align: right;
+    margin-left: auto;
+    margin-right: 0;
+    word-break: break-all;
+    white-space: normal;
 }
 .status-dot {
     width: 8px;

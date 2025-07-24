@@ -38,11 +38,11 @@ const TransactionItem = ({ transaction, index }) => {
               />
             )}
           </div>
-          <div className="d-flex flex-column mx-3 text-start">
+          <div className="d-flex flex-column mx-3 text-start flex-shrink-1" style={{ minWidth: 0 }}>
             <span className="recent-activity-topic fw-normal">
               {transaction.direction === "send" ? "Sent" : "Received"}
             </span>
-            <span className="recent-activity-address text-muted">
+            <span className="recent-activity-address text-muted no-wallet-wrap">
               {transaction.direction === "send" 
                 ? `${formatWalletAddress(transaction.to)}`
                 : `${formatWalletAddress(transaction.from)}`
@@ -56,7 +56,7 @@ const TransactionItem = ({ transaction, index }) => {
         <span
           className={`recent-activity-value ${
             transaction.direction === "send" ? "red-text" : "green-text"
-          }`}
+          } right-align-amount`}
         >
           {transaction.direction === "send" ? "-" : "+"}
           {transaction.value} {WSO2_TOKEN}
