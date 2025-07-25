@@ -38,7 +38,7 @@ const TransactionItem = ({ transaction, index }) => {
               />
             )}
           </div>
-          <div className="d-flex flex-column mx-3 text-start flex-shrink-1" style={{ minWidth: 0 }}>
+          <div className="d-flex flex-column mx-1 text-start flex-shrink-1" style={{ minWidth: 0 }}>
             <span className="recent-activity-topic fw-normal">
               {transaction.direction === "send" ? "Sent" : "Received"}
             </span>

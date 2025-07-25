@@ -113,9 +113,9 @@ function Home() {
   };
 
   return (
-    <div className="home-container ">
+    <div className="home-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', minHeight: '100vh' }}>
       {contextHolder}
-      <div className="wallet-balance-details mt-4">
+      <div className="wallet-balance-details mt-4" style={{ flex: 'none' }}>
         <span className="total-balance-tag">{TOTAL_BALANCE}</span>
         <span className="total-balance-value">
           {isTokenBalanceLoading ? (
@@ -133,51 +133,19 @@ function Home() {
                 value={tokenBalance}
                 displayType={"text"}
                 thousandSeparator={true}
-                decimalScale={6}
+                decimalScale={9}
                 fixedDecimalScale={false}
               />
             )
           )}
         </span>
-        {/* <CopyToClipboard text={walletAddress} onCopy={handleCopyAccount}>
-          <Tooltip title={isAccountCopied ? "Copied" : "Copy to Clipboard"}>
-            <Tag className="total-balance-wallet-address mt-2">
-              {getEllipsisTxt(walletAddress, 13)}{" "}
-              {!isAccountCopied ? (
-                <CopyOutlined style={{ marginLeft: "5px" }} />
-              ) : (
-                <CheckOutlined style={{ marginLeft: "5px" }} />
-              )}
-            </Tag>
-          </Tooltip>
-        </CopyToClipboard> */}
         <div className="send-button pt-3">
           <Button className="primary-button container" onClick={handleSend}>{SEND_TOKENS}</Button>
         </div>
-        {/* <div className="d-flex justify-content-between mt-4">
-          <div>
-            <div className="total-balance-icons mx-5">
-              <div style={{ marginTop: "-2px", marginBottom: "-2px" }}>
-                <DownloadOutlined
-                  style={{ fontSize: "18px", cursor: "pointer" }}
-                />
-              </div>
-            </div>
-            <div className="total-balance-action">{REQUEST}</div>
-          </div>
-          <div>
-            <div className="total-balance-icons">
-              <div style={{ marginTop: "-2px", marginBottom: "-2px" }}>
-                <WalletOutlined
-                  style={{ fontSize: "18px", cursor: "pointer" }}
-                />
-              </div>
-            </div>
-            <div className="total-balance-action">{BUY}</div>
-          </div>
-        </div> */}
       </div>
-      <RecentActivities ref={recentActivitiesRef} walletAddress={walletAddress} />
+      <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+        <RecentActivities ref={recentActivitiesRef} walletAddress={walletAddress} />
+      </div>
     </div>
   );
 }

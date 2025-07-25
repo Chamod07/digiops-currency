@@ -92,6 +92,35 @@ const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) 
     }
   }
 
+  const [showPagination, setShowPagination] = useState(false);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    setShowPagination(false);
+  }, [page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = scrollRef.current;
+      if (!container) return;
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      if (scrollTop + clientHeight >= scrollHeight - 10 && totalCount > pageSize) {
+        setShowPagination(true);
+      } else {
+        setShowPagination(false);
+      }
+    };
+    const container = scrollRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [transactions, totalCount, pageSize]);
+
   return (
     <div className="recent-activities-widget">
       <div className="recent-activities-widget-inner">
@@ -112,18 +141,20 @@ const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) 
           </div>
         ) : (
           <>
-            <div className="recent-activity-container">
+            <div className="recent-activity-container" ref={scrollRef} style={{ maxHeight: 350, overflowY: 'auto' }}>
               <TransactionList transactions={transactions} />
-            </div>
-            <div className="d-flex justify-content-center mt-4">
-              <Pagination
-                current={page}
-                pageSize={5}
-                total={totalCount}
-                onChange={setPage}
-                showSizeChanger={false}
-                hideOnSinglePage
-              />
+              {showPagination && (
+                <div className="d-flex justify-content-center mt-4">
+                  <Pagination
+                    current={page}
+                    pageSize={5}
+                    total={totalCount}
+                    onChange={setPage}
+                    showSizeChanger={false}
+                    hideOnSinglePage
+                  />
+                </div>
+              )}
             </div>
           </>
         )}
