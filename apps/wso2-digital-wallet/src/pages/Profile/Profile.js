@@ -28,6 +28,8 @@ import {
   CheckOutlined,
   CopyOutlined,
   LoadingOutlined,
+  QrcodeOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 
 import WalletAddressCopy from '../../components/Home/WalletAddressCopy';
@@ -42,6 +44,7 @@ import {
   OK,
   WALLET_ADDRESS_COPIED,
   WALLET_PRIVATE_KEY,
+  SHOW_WALLET_ADDRESS
 } from '../../constants/strings';
 import { showToast, showAlertBox } from '../../helpers/alerts';
 import {
@@ -50,6 +53,7 @@ import {
 } from '../../helpers/storage';
 import { getUserWalletAddresses, setWalletAsPrimary } from '../../services/wallet.service';
 import { Modal } from 'antd';
+import { QRCodeSVG } from 'qrcode.react';
 
 function Profile() {
   const navigate = useNavigate();
@@ -62,6 +66,7 @@ function Profile() {
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isSettingPrimary, setIsSettingPrimary] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const fetchWalletDetails = async () => {
     try {
@@ -190,15 +195,27 @@ function Profile() {
           </div>
         )}
       </Modal>
-      <div className="profile-header">
-        <h4>Profile</h4>
-      </div>
-      {/* <div className="d-flex justify-content-center mt-4">
-        <Avatar size={80} src={avatarUrl} />
-      </div> */}
-      <div className="mt-4">
-        <div className="profile-title">Public Wallet Address</div>
-        <div className="d-flex justify-content-center mt-1">
+
+      {/* QR Code Modal */}
+      <Modal
+        open={isQrModalOpen}
+        onCancel={() => setIsQrModalOpen(false)}
+        footer={null}
+        title="Wallet QR Code"
+        centered
+      >
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <div style={{ marginBottom: '16px', fontSize: '14px', color: COLORS.GRAY_MEDIUM, fontWeight: '500' }}>
+            Share this QR code to receive coins
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <QRCodeSVG
+              value={walletAddress}
+              size={200}
+              level="M"
+            />
+          </div>
+        <div className="d-flex justify-content-center">
           <CopyToClipboard text={walletAddress} onCopy={handleCopyAccount}>
             <Tooltip title={isAccountCopied ? "Copied" : "Copy to Clipboard"}>
               <Tag className="total-balance-wallet-address mt-2 d-flex">
@@ -215,6 +232,38 @@ function Profile() {
               </Tag>
             </Tooltip>
           </CopyToClipboard>
+        </div>
+        </div>
+      </Modal>
+
+      <div className="profile-header">
+        <h4>Profile</h4>
+      </div>
+      {/* <div className="d-flex justify-content-center mt-4">
+        <Avatar size={80} src={avatarUrl} />
+      </div> */}
+      <div className="mt-4">
+        <div className="profile-title">Public Wallet Address</div>
+        <div className="d-flex justify-content-center mt-2">
+          <Button
+            type="primary"
+            className="primary-button"
+            icon={<QrcodeOutlined />}
+            onClick={() => setIsQrModalOpen(true)}
+            style={{
+              borderRadius: '6px',
+              fontSize: '15px',
+              fontWeight: '700',
+              padding: '0 24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              minWidth: '180px'
+            }}
+          >
+            {SHOW_WALLET_ADDRESS}
+          </Button>
         </div>
       </div>
       <div className="mt-4">
@@ -259,9 +308,23 @@ function Profile() {
         )}
       </div>
       <div className="logout-button">
-        <Button className="default-button container" onClick={handleLogout}>
-          {LOGOUT}
-        </Button>
+        <div className="d-flex justify-content-center">
+          <Button 
+            className="default-button" 
+            onClick={handleLogout}
+            icon={<LogoutOutlined />}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              minWidth: '140px',
+              padding: '0 24px'
+            }}
+          >
+            {LOGOUT}
+          </Button>
+        </div>
       </div>
     </div>
   );
