@@ -32,6 +32,12 @@ public type WalletAddressInfo record {|
     string createdOn;
 |};
 
+# Request payload for creating a wallet.
+public type CreateWalletPayload record {|
+    # Wallet address
+    string walletAddress;
+|};
+
 # Default wallet information.
 public type DefaultWallet record {|
     # Wallet address
