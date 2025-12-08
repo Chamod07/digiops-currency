@@ -37,3 +37,9 @@ public type CreateWalletPayload record {|
     # Wallet address
     string walletAddress;
 |};
+
+# Default wallet information.
+public type DefaultWallet record {|
+    # Wallet address
+    string walletAddress;
+|};

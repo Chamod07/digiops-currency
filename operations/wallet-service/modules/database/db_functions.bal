@@ -63,6 +63,15 @@ public isolated function getWalletAddressesByEmail(string userEmail) returns typ
         select wallet;
 }
 
+# Get the default wallet address for a user.
+#
+# + userEmail - The email address of the user
+# + return - Wallet address string if user has wallets, null if user has no wallets, else error
+public isolated function getDefaultWalletByEmail(string userEmail) returns string|error? {
+    string|sql:Error walletAddress = dbClient->queryRow(getDefaultWalletByEmailQuery(userEmail));
+    return walletAddress is sql:NoRowsError ? () : walletAddress;
+}
+
 # Insert a user wallet.
 #
 # + userWallet - User wallet information
