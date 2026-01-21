@@ -1,0 +1,239 @@
+/* 
+// Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+//
+// This software is the property of WSO2 LLC. and its suppliers, if any.
+// Dissemination of any information or reproduction of any material contained
+// herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+// You may not alter or remove any copyright or other notice from copies of this content.
+*/
+
+.receive-coins-container {
+  min-height: calc(100vh - 150px);
+  padding-bottom: 100px;
+}
+
+.receive-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-button {
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px;
+}
+
+.back-button .anticon {
+  display: flex;
+  align-items: center;
+}
+
+.receive-header {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Input Section */
+.receive-input-section {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.receive-description {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  margin-bottom: 32px;
+  padding: 0 20px;
+  line-height: 1.5;
+}
+
+.amount-input-container {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 32px;
+}
+
+.amount-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px;
+  background: #ffffff;
+  transition: border-color 0.3s;
+}
+
+.amount-input-wrapper:focus-within {
+  border-color: #ff7400;
+}
+
+.amount-input {
+  flex: 1;
+  border: none !important;
+  font-size: 28px;
+  font-weight: 600;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.amount-input .ant-input {
+  border: none !important;
+  font-size: 28px;
+  font-weight: 600;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.amount-input .ant-input:focus {
+  box-shadow: none !important;
+}
+
+.currency-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #212529;
+  margin-left: 12px;
+}
+
+.generate-qr-button {
+  width: 100%;
+  max-width: 400px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* QR Code Display Section */
+.qr-code-display {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-display-description {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  margin-bottom: 24px;
+  padding: 0 5px;
+  line-height: 1.5;
+}
+
+.qr-code-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 20px;
+}
+
+.qr-code-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  background: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.qr-code-info {
+  width: 100%;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.qr-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qr-info-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 12px 0;
+}
+
+.qr-info-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.qr-info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.wallet-address-text {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+/* Action Buttons */
+.qr-actions {
+  width: 100%;
+  max-width: 340px;
+}
+
+.action-buttons-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.action-button {
+  flex: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.new-qr-button {
+  height: 48px;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 15px;
+}

@@ -13,11 +13,18 @@ export const NOT_CONNECTED = "Not Connected";
 
 // home page
 export const TOTAL_BALANCE = "Total Balance";
-export const SEND_COINS = "Send Coins";
+export const SEND = "Send";
 export const REQUEST = "Request";
 export const BUY = "Buy";
 export const RECENT_ACTIVITIES = "Recent Activities";
 export const WSO2_TOKEN = "WSO2";
+
+// receive coins page
+export const RECEIVE_COINS_TITLE = "Request Coins";
+export const AMOUNT_TO_RECEIVE = "Amount to Receive";
+export const GENERATE_QR_CODE = "Generate QR Code";
+export const SHARE_QR_CODE = "Share";
+export const DOWNLOAD_QR_CODE = "Download";
 
 // footer
 export const WALLET = "Wallet";

@@ -54,6 +54,10 @@
     line-height: 19.6px;
     margin-top: 5px;
 }
+
+.action-buttons .gap-2 {
+    gap: 10px;
+}
 /* .recent-activities-widget {    
     background: red;
     flex: 0;
