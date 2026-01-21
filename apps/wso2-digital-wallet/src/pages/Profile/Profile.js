@@ -210,7 +210,9 @@ function Profile() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
             <QRCodeSVG
-              value={walletAddress}
+              value={JSON.stringify({
+                wallet_address: walletAddress
+              })}
               size={200}
               level="M"
             />
