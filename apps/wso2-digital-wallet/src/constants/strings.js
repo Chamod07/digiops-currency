@@ -15,7 +15,6 @@ export const NOT_CONNECTED = "Not Connected";
 export const TOTAL_BALANCE = "Total Balance";
 export const SEND = "Send";
 export const REQUEST = "Request";
-export const BUY = "Buy";
 export const RECENT_ACTIVITIES = "Recent Activities";
 export const WSO2_TOKEN = "WSO2";
 

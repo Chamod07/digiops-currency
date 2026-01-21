@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Input, Button, Avatar, message } from "antd";
 import {
-  ArrowLeftOutlined,
+  HomeOutlined,
   DownloadOutlined,
   ShareAltOutlined,
   QrcodeOutlined,
@@ -101,8 +101,8 @@ function ReceiveCoins() {
 
     // Create QR code data with wallet address and amount
     const qrData = JSON.stringify({
-      address: walletAddress,
-      amount: receiveAmount,
+      wallet_address: walletAddress,
+      coin_amount: receiveAmount,
     });
 
     setQrCodeData(qrData);
@@ -218,7 +218,7 @@ function ReceiveCoins() {
       <div className="receive-header-section mt-4">
         <Button
           type="link"
-          icon={<ArrowLeftOutlined />}
+          icon={<HomeOutlined />}
           onClick={handleBack}
           className="back-button"
         >
