@@ -84,11 +84,10 @@ export default function RecoverWallet() {
   const renderInputs = () => {
     const inputs = [];
     for (let i = 0; i < 12; i++) {
-      const formattedNumber = (i + 1 < 10) ? `${i + 1}&nbsp;` : (i + 1).toString();
       inputs.push(
         <Col md="6" sm="6" xs="6" key={i}>
           <div className="input-container mt-2">
-            <label className="input-label" dangerouslySetInnerHTML={{ __html: formattedNumber }} />
+            <label className="input-label">{i + 1}</label>
             <Input
               value={wordList[i]}
               onChange={(event) => handleInputChange(i, event.target.value)}

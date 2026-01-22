@@ -11,9 +11,16 @@
   display: flex;
   align-items: center;
 }
+
+.input-container .ant-input {
+  flex: 1;
+}
   
 .input-label {
   margin-right: 8px;
+  min-width: 24px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .recover-wallet-content {

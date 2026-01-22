@@ -143,12 +143,12 @@ function ReceiveCoins() {
                 messageApi.success("QR code shared successfully");
               } else {
                 messageApi.warning(
-                  "Share not supported on this device. Please use download instead.",
+                  "QR Code sharing is not supported on this device.",
                 );
               }
             } else {
               messageApi.warning(
-                "Share not supported on this device. Please use download instead.",
+                "QR Code sharing is not supported on this device.",
               );
             }
           } catch (error) {
@@ -158,7 +158,7 @@ function ReceiveCoins() {
             } else {
               console.error("Error sharing QR code:", error);
               messageApi.warning(
-                "Share not supported. Please use download instead.",
+                "QR Code sharing is not supported on this device.",
               );
             }
           }

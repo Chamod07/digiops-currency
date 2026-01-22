@@ -44,8 +44,8 @@ function WalletAddressCopy(props) {
                 {walletPhraseWords.map((word, index) => (
                     <Col key={index} md="6" sm="6" xs="6" className="mt-2">
                         <div className="d-flex">
-                            <span className="mx-2 mt-1"> {index + 1} </span>
-                            <Input value={word} />
+                            <span className="mx-2 mt-1" style={{ minWidth: '24px', textAlign: 'right', flexShrink: 0 }}>{index + 1}</span>
+                            <Input value={word} style={{ flex: 1 }} />
                         </div>
                     </Col>
                 ))}
