@@ -16,7 +16,7 @@ export const TOTAL_BALANCE = "Total Balance";
 export const SEND = "Send";
 export const REQUEST = "Request";
 export const RECENT_ACTIVITIES = "Recent Activities";
-export const WSO2_TOKEN = "WSO2";
+export const WSO2_TOKEN = "O2C";
 
 // receive coins page
 export const RECEIVE_COINS_TITLE = "Request Coins";

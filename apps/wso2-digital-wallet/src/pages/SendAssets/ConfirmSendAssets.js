@@ -141,7 +141,7 @@ function ConfirmSendAssets() {
         </Col>
       </Row>
       <div className="d-flex flex-column mt-3 sending-details">
-        <span className="sending-wso2">SENDING WSO2</span>
+        <span className="sending-wso2">SENDING O2C</span>
         <div className="d-flex justify-content-start mt-2">
           <Avatar size={20} src={Wso2MainImg} />
           <span className="send-coin-balance mx-1">{sendAmount}</span>
@@ -149,7 +149,7 @@ function ConfirmSendAssets() {
       </div>
       <div className="d-flex justify-content-between mt-5">
         <span className="">Total</span>
-        <span className="">{sendAmount} WSO2</span>
+        <span className="">{sendAmount} O2C</span>
       </div>
       <Row className="send-button-section">
         <Col md="6" sm="6">

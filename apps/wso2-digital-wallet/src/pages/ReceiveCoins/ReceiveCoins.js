@@ -128,7 +128,7 @@ function ReceiveCoins() {
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `receive-${receiveAmount}-WSO2.png`;
+          a.download = `receive-${receiveAmount}-O2C.png`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -167,13 +167,13 @@ function ReceiveCoins() {
             if (navigator.share && navigator.canShare) {
               const file = new File(
                 [blob],
-                `receive-${receiveAmount}-WSO2.png`,
+                `receive-${receiveAmount}-O2C.png`,
                 { type: "image/png" },
               );
               const shareData = {
                 files: [file],
-                title: `Receive ${receiveAmount} WSO2`,
-                text: `Scan this QR code to send ${receiveAmount} WSO2 tokens`,
+                title: `Receive ${receiveAmount} O2C`,
+                text: `Scan this QR code to send ${receiveAmount} O2C tokens`,
               };
 
               if (navigator.canShare(shareData)) {
@@ -286,7 +286,7 @@ function ReceiveCoins() {
             <div className="qr-code-info">
               <div className="qr-info-item">
                 <span className="qr-info-label">Amount</span>
-                <span className="qr-info-value">{receiveAmount} WSO2</span>
+                <span className="qr-info-value">{receiveAmount} O2C</span>
               </div>
               <div className="qr-info-divider"></div>
               <div className="qr-info-item">
