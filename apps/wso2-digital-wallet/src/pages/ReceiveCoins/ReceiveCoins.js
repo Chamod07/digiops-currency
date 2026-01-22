@@ -9,7 +9,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { Input, Button, Avatar, message } from "antd";
 import {
   HomeOutlined,
-  DownloadOutlined,
   ShareAltOutlined,
   QrcodeOutlined,
 } from "@ant-design/icons";
@@ -24,7 +23,6 @@ import {
   AMOUNT_TO_RECEIVE,
   GENERATE_QR_CODE,
   SHARE_QR_CODE,
-  DOWNLOAD_QR_CODE,
 } from "../../constants/strings";
 import { getLocalDataAsync } from "../../helpers/storage";
 import { STORAGE_KEYS, DEFAULT_WALLET_ADDRESS } from "../../constants/configs";
@@ -107,43 +105,6 @@ function ReceiveCoins() {
 
     setQrCodeData(qrData);
     setShowQrCode(true);
-  };
-
-  const handleDownloadQrCode = () => {
-    try {
-      const svg = qrCodeRef.current.querySelector("svg");
-      const svgData = new XMLSerializer().serializeToString(svg);
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const img = new Image();
-
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-
-        canvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `receive-${receiveAmount}-O2C.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          messageApi.success("QR code downloaded successfully");
-        });
-      };
-
-      img.src =
-        "data:image/svg+xml;base64," +
-        btoa(unescape(encodeURIComponent(svgData)));
-    } catch (error) {
-      console.error("Error downloading QR code:", error);
-      messageApi.error("Failed to download QR code");
-    }
   };
 
   const handleShareQrCode = async () => {
@@ -302,10 +263,14 @@ function ReceiveCoins() {
             <div className="action-buttons-row">
               <Button
                 className="default-button action-button"
-                onClick={handleDownloadQrCode}
-                icon={<DownloadOutlined />}
+                onClick={() => {
+                  setShowQrCode(false);
+                  setReceiveAmount("");
+                  setQrCodeData("");
+                }}
+                icon={<QrcodeOutlined />}
               >
-                {DOWNLOAD_QR_CODE}
+                New QR Code
               </Button>
               <Button
                 className="primary-button action-button"
@@ -315,17 +280,6 @@ function ReceiveCoins() {
                 {SHARE_QR_CODE}
               </Button>
             </div>
-            <Button
-              block
-              className="default-button new-qr-button"
-              onClick={() => {
-                setShowQrCode(false);
-                setReceiveAmount("");
-                setQrCodeData("");
-              }}
-            >
-              Generate New QR Code
-            </Button>
           </div>
         </div>
       )}

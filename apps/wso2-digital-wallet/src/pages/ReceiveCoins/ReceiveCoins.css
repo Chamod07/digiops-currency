@@ -215,8 +215,7 @@
 
 .action-buttons-row {
   display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 12px;
 }
 
 .action-button {
@@ -226,13 +225,6 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-weight: 600;
-  border-radius: 8px;
-  font-size: 15px;
-}
-
-.new-qr-button {
-  height: 48px;
   font-weight: 600;
   border-radius: 8px;
   font-size: 15px;
