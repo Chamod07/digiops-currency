@@ -62,7 +62,7 @@ export const WALLET_SECURE_TIPS = [
 export const CONFIRM_RECOVERY_PHRASE = "Have you securely stored your recovery phrase? This phrase is required to restore access to your wallet. It cannot be recovered if lost, and losing it may result in permanent loss of access to your wallet.";
 
 export const OK = "Ok";
-export const ERROR = "Error";
+export const ERROR = "Oops!";
 export const SUCCESS = "Success";
 export const COPIED = "Copied!";
 
@@ -76,7 +76,7 @@ export const ERROR_FETCHING_LOCAL_TX_DETAILS = "Error when fetching local transa
 export const ERROR_RESETTING_TX_VALUES = "Error when resetting tx values";
 export const ERROR_SAVING_TX_DETAILS = "Error when saving transaction details";
 export const ERROR_CREATING_WALLET = "Something went wrong when creating wallet";
-export const ERROR_TRANSFERRING_TOKEN = "Something went wrong when transferring token";
+export const ERROR_TRANSFERRING_TOKEN = "Something went wrong when transferring coins. Please try again.";
 
 export const ERROR_BRIDGE_NOT_READY =
   "Bridge not ready, please try again later";

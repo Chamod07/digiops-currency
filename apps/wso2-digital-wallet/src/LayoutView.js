@@ -29,7 +29,8 @@ function LayoutView() {
       location.pathname === "/history" ||
       location.pathname === "/profile" ||
       location.pathname === "/send" ||
-      location.pathname === "/receive"
+      location.pathname === "/receive" ||
+      location.pathname === "/confirm-assets-send"
     ) {
       setIsShowNavBar(false);
     } else {
