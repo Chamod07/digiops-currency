@@ -7,11 +7,10 @@
 
 import React, { useEffect, useState } from "react";
 import { Input, Button, Avatar, message, Spin } from "antd";
-import { SearchOutlined, ScanOutlined, ArrowRightOutlined, CloseOutlined } from "@ant-design/icons";
+import { SearchOutlined, QrcodeOutlined, ArrowRightOutlined, HomeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "./SendAssets.css";
 import { isAddress } from "ethereum-address";
-import { Col, Row } from "reactstrap";
 import Wso2MainImg from "../../assets/images/wso2_main.png";
 import {
   ERROR_FETCHING_LOCAL_TX_DETAILS,
@@ -20,7 +19,6 @@ import {
   ERROR_RETRIEVE_WALLET_ADDRESS,
   ERROR_BRIDGE_NOT_READY
 } from "../../constants/strings";
-import { COLORS } from '../../constants/colors';
 import { getLocalDataAsync, saveLocalDataAsync } from "../../helpers/storage";
 import { STORAGE_KEYS, DEFAULT_WALLET_ADDRESS } from "../../constants/configs";
 import { getWalletBalanceByWalletAddress } from "../../services/blockchain.service";
@@ -38,6 +36,7 @@ function SendAssets() {
   const [isShowErrorMsg, setIsShowErrorMsg] = useState(false);
   const [walletValidationErrorMsg, setWalletValidationErrorMsg] = useState("");
   const [isCanContinue, setIsCanContinue] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   const [storedSendWalletAddress, setStoredSendWalletAddress] = useState("");
   const [storedSendAmount, setStoredSendAmount] = useState("");
@@ -141,16 +140,6 @@ function SendAssets() {
     }
   };
 
-  const handleCancel = async () => {
-    try {
-      await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, "");
-      await saveLocalDataAsync(STORAGE_KEYS.SENDER_WALLET_ADDRESS, "");
-      navigate("/");
-    } catch (error) {
-      console.log(`${ERROR_RESETTING_TX_VALUES}: ${error}`);
-    }
-  };
-
   const handleWalletAddressInputChange = (e) => {
     const address = e.target.value;
     setSendWalletAddress(address);
@@ -161,14 +150,60 @@ function SendAssets() {
   };
 
   const handleScanQrCode = () => {
+    setIsScanning(true);
     scanQrCode(
-      (qrData) => {
-        setSendWalletAddress(qrData);
-        messageApi.success("QR Code scanned successfully!");
+      async (qrData) => {
+        try {
+          // Try parsing as JSON
+          const parsedData = JSON.parse(qrData);
+          
+          // Validate wallet address
+          if (!parsedData.wallet_address || !isAddress(parsedData.wallet_address)) {
+            messageApi.error("Invalid wallet address in QR code");
+            setIsScanning(false);
+            return;
+          }
+          
+          // Check if it's a payment request (has coin_amount)
+          if (parsedData.coin_amount) {
+            // Payment Request QR - Navigate directly to confirm
+            const amount = parseFloat(parsedData.coin_amount);
+            if (isNaN(amount) || amount <= 0) {
+              messageApi.error("Invalid payment amount in QR code");
+              setIsScanning(false);
+              return;
+            }
+            
+            // Save to localStorage and navigate to confirm page
+            await saveLocalDataAsync(STORAGE_KEYS.SENDER_WALLET_ADDRESS, parsedData.wallet_address);
+            await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, parsedData.coin_amount);
+            messageApi.success("Payment request loaded");
+            
+            // Navigate directly to confirmation
+            setTimeout(() => {
+              navigate("/confirm-assets-send");
+            }, 500);
+          } else {
+            // Profile QR - Only address, fill the field
+            setSendWalletAddress(parsedData.wallet_address);
+            messageApi.success("Recipient address added");
+          }
+          setIsScanning(false);
+        } catch (error) {
+          // Failed to parse JSON
+          if (isAddress(qrData)) {
+            setSendWalletAddress(qrData);
+            messageApi.success("Recipient address added");
+          } else {
+            messageApi.error("Invalid QR code format");
+          }
+          setIsScanning(false);
+        }
       },
       (error) => {
         console.error("QR Code scan failed:", error);
         messageApi.error("Failed to scan QR code. Please try again.");
+        setIsScanning(false);
       }
     );
   };
@@ -200,148 +235,127 @@ function SendAssets() {
   }, [storedSendWalletAddress, storedSendAmount]);
 
   useEffect(() => {
-    if (sendWalletAddress && parseFloat(sendAmount) !== 0) {
+    if (isValidWalletAddress && sendAmount && parseFloat(sendAmount) > 0) {
       setIsCanContinue(true);
     } else {
       setIsCanContinue(false);
     }
-  }, [sendWalletAddress, sendAmount]);
+  }, [isValidWalletAddress, sendAmount]);
 
   useEffect(() => {
     setIsValidWalletAddress(isAddress(sendWalletAddress));
-    if (isAddress(sendWalletAddress)) {
+    if (sendWalletAddress === "") {
+      setIsShowErrorMsg(false);
+      setWalletValidationErrorMsg("");
+    } else if (isAddress(sendWalletAddress)) {
       setIsShowErrorMsg(false);
       setWalletValidationErrorMsg("");
     } else {
       setIsShowErrorMsg(true);
-      setWalletValidationErrorMsg("Please Enter Valid Wallet Address");
+      setWalletValidationErrorMsg("Invalid wallet address");
     }
   }, [sendWalletAddress]);
 
   return (
     <div className="mx-3">
       {contextHolder}
-      <div className="mt-4 d-flex justify-content-between">
-        <span className="send-header">Send to</span>
-        <Button type="link" onClick={handleSendCancel}>
-          Cancel
+      <div className="mt-4 d-flex justify-content-between align-items-center">
+        <Button
+          type="link"
+          icon={<HomeOutlined />}
+          onClick={handleSendCancel}
+          className="back-button"
+        >
+          Home
         </Button>
+        <span className="send-header">Send Coins</span>
+        <div style={{ width: 60 }}></div>
       </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <Input
-          className="wallet-search-input"
-          prefix={<SearchOutlined />}
-          placeholder="Search public wallet address (0x)"
-          value={sendWalletAddress}
-          onChange={handleWalletAddressInputChange}
-          size="large"
-          style={{ flex: 1 }}
-        />
+
+      <div className="scan-section">
         <Button
           type="primary"
-          className="primary-button"
-          icon={<ScanOutlined />}
+          className="primary-button scan-primary-button"
+          icon={<QrcodeOutlined />}
           onClick={handleScanQrCode}
-          size="large"
-          style={{
-            minWidth: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        />
-      </div>
-      {isShowErrorMsg ? (
-        <span className="red-text">{walletValidationErrorMsg}</span>
-      ) : (
-        <></>
-      )}
-
-      {isValidWalletAddress && (
-        <div className="mt-5">
-          <Row align="left">
-            <Col md="4" sm="4" className="asset-column">
-              <div className="asset-content">Asset</div>
-            </Col>
-            <Col md="8" sm="8">
-              <div className="send-coin-info">
-                <Avatar size={40} src={Wso2MainImg} />
-                <div className="send-coin-details d-flex flex-column">
-                  <span className="send-coin-name">WSO2</span>
-                  <span className="send-coin-balance">
-                    Balance:{" "}
-                    {isTokenBalanceLoading ? (
-                      <Spin size="small" />
-                    ) : (
-                      tokenBalance
-                    )}{" "}
-                    WSO2
-                  </span>
-                </div>
-              </div>
-            </Col>
-          </Row>
-          <Row align="left" className="mt-3 mb-4">
-            <Col md="4" sm="4" className="asset-column">
-              <div className="asset-content">Amount</div>
-            </Col>
-            <Col md="8" sm="8">
-              <div className="send-coin-input-card">
-                <Input.Group compact>
-                  <Input
-                    className="send-coin-input"
-                    placeholder="Enter value"
-                    suffix="WSO2"
-                    value={sendAmount}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*(\.\d*)?$/.test(value)) {
-                        setSendAmount(value);
-                      }
-                    }}
-                  />
-                </Input.Group>
-                {/* <span className="send-coin-balance">$0.00 USD</span> */}
-              </div>
-            </Col>
-          </Row>
-          <Row className="send-button-section">
-            <Col md="6" sm="6">
-              <Button 
-                block 
-                className="default-button" 
-                onClick={handleCancel}
-                icon={<CloseOutlined />}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                Cancel
-              </Button>
-            </Col>
-            <Col md="6" sm="6">
-              <Button
-                block
-                className="primary-button mt-2"
-                onClick={handleSendAssetsNext}
-                disabled={!isCanContinue}
-                icon={<ArrowRightOutlined />}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                Next
-              </Button>
-            </Col>
-          </Row>
+          loading={isScanning}
+        >
+          {isScanning ? "Scanning..." : "Scan QR Code"}
+        </Button>
+        <div className="or-divider">
+          <span>Or enter manually</span>
         </div>
-      )}
+      </div>
+
+      <div className="form-section">
+        <div className="form-field">
+          <div className="field-label">Recipient Address</div>
+          <Input
+            className="wallet-search-input"
+            prefix={<SearchOutlined />}
+            placeholder="Enter wallet address (0x)"
+            value={sendWalletAddress}
+            onChange={handleWalletAddressInputChange}
+            size="large"
+            status={isShowErrorMsg && sendWalletAddress ? "error" : ""}
+          />
+          {isShowErrorMsg && sendWalletAddress && (
+            <span className="error-text">{walletValidationErrorMsg}</span>
+          )}
+        </div>
+
+        <div className="asset-section">
+          <div className="section-label">Asset</div>
+          <div className="asset-info-card">
+            <Avatar size={48} src={Wso2MainImg} />
+            <div className="asset-details">
+              <span className="asset-name">O2C</span>
+              <span className="asset-balance">
+                Balance:{" "}
+                {isTokenBalanceLoading ? (
+                  <Spin size="small" />
+                ) : (
+                  tokenBalance
+                )}{" "}
+                O2C
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="amount-section">
+          <div className="field-label">Amount</div>
+          <Input
+            className="amount-input"
+            placeholder="0"
+            suffix="O2C"
+            value={sendAmount}
+            disabled={!isValidWalletAddress}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*(\.\d*)?$/.test(value)) {
+                setSendAmount(value);
+              }
+            }}
+          />
+          {!isValidWalletAddress && (
+            <span className="helper-text">Enter a valid wallet address first</span>
+          )}
+        </div>
+
+        <div className="button-group">
+          <Button
+            block
+            type="primary"
+            className="next-button"
+            onClick={handleSendAssetsNext}
+            disabled={!isCanContinue}
+            icon={<ArrowRightOutlined />}
+          >
+            Continue
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
