@@ -21,7 +21,8 @@ import {
   ERROR_BRIDGE_NOT_READY,
   OK,
   SUCCESS,
-  SUCCESS_TOKEN_TRANSFER
+  SUCCESS_TOKEN_TRANSFER,
+  WSO2_TOKEN
 } from "../../constants/strings";
 import { STORAGE_KEYS } from "../../constants/configs";
 import { showToast, showAlertBox } from "../../helpers/alerts";
@@ -111,7 +112,7 @@ function ConfirmSendAssets() {
         <div className="amount-hero">
           <div className="amount-subtitle">You're sending</div>
           <div className="amount-value">{sendAmount}</div>
-          <div className="amount-currency">O2C</div>
+          <div className="amount-currency">{WSO2_TOKEN}</div>
         </div>
 
         {/* Transaction Flow - Compact Horizontal */}
@@ -144,7 +145,7 @@ function ConfirmSendAssets() {
             <span className="total-amount">{sendAmount}</span>
             <div className="currency-badge">
               <Avatar size={24} src={Wso2MainImg} />
-              <span>O2C</span>
+              <span>{WSO2_TOKEN}</span>
             </div>
           </div>
         </div>

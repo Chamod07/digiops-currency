@@ -23,6 +23,7 @@ import {
   AMOUNT_TO_RECEIVE,
   GENERATE_QR_CODE,
   SHARE_QR_CODE,
+  WSO2_TOKEN,
 } from "../../constants/strings";
 import { getLocalDataAsync } from "../../helpers/storage";
 import { STORAGE_KEYS, DEFAULT_WALLET_ADDRESS } from "../../constants/configs";
@@ -128,13 +129,13 @@ function ReceiveCoins() {
             if (navigator.share && navigator.canShare) {
               const file = new File(
                 [blob],
-                `receive-${receiveAmount}-O2C.png`,
+                `receive-${receiveAmount}-${WSO2_TOKEN}.png`,
                 { type: "image/png" },
               );
               const shareData = {
                 files: [file],
-                title: `Receive ${receiveAmount} O2C`,
-                text: `Scan this QR code to send ${receiveAmount} O2C tokens`,
+                title: `Receive ${receiveAmount} ${WSO2_TOKEN}`,
+                text: `Scan this QR code to send ${receiveAmount} ${WSO2_TOKEN} tokens`,
               };
 
               if (navigator.canShare(shareData)) {
@@ -214,7 +215,7 @@ function ReceiveCoins() {
               />
               <div className="currency-badge">
                 <Avatar size={24} src={Wso2MainImg} />
-                <span>O2C</span>
+                <span>{WSO2_TOKEN}</span>
               </div>
             </div>
           </div>
@@ -247,7 +248,7 @@ function ReceiveCoins() {
             <div className="qr-code-info">
               <div className="qr-info-item">
                 <span className="qr-info-label">Amount</span>
-                <span className="qr-info-value">{receiveAmount} O2C</span>
+                <span className="qr-info-value">{receiveAmount} {WSO2_TOKEN}</span>
               </div>
               <div className="qr-info-divider"></div>
               <div className="qr-info-item">

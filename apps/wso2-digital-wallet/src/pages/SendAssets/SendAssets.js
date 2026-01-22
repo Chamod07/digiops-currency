@@ -17,7 +17,8 @@ import {
   ERROR_RESETTING_TX_VALUES,
   ERROR_SAVING_TX_DETAILS,
   ERROR_RETRIEVE_WALLET_ADDRESS,
-  ERROR_BRIDGE_NOT_READY
+  ERROR_BRIDGE_NOT_READY,
+  WSO2_TOKEN
 } from "../../constants/strings";
 import { getLocalDataAsync, saveLocalDataAsync } from "../../helpers/storage";
 import { STORAGE_KEYS, DEFAULT_WALLET_ADDRESS } from "../../constants/configs";
@@ -309,7 +310,7 @@ function SendAssets() {
           <div className="asset-info-card">
             <Avatar size={48} src={Wso2MainImg} />
             <div className="asset-details">
-              <span className="asset-name">O2C</span>
+              <span className="asset-name">{WSO2_TOKEN}</span>
               <span className="asset-balance">
                 Balance:{" "}
                 {isTokenBalanceLoading ? (
@@ -317,7 +318,7 @@ function SendAssets() {
                 ) : (
                   tokenBalance
                 )}{" "}
-                O2C
+                {WSO2_TOKEN}
               </span>
             </div>
           </div>
@@ -328,7 +329,7 @@ function SendAssets() {
           <Input
             className="amount-input"
             placeholder="0"
-            suffix="O2C"
+            suffix={WSO2_TOKEN}
             value={sendAmount}
             disabled={!isValidWalletAddress}
             onChange={(e) => {
