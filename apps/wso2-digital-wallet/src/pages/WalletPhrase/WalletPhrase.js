@@ -23,7 +23,6 @@ import {
   SHOW_WALLET_ADDRESS,
   CONFIRM_RECOVERY_PHRASE
 } from "../../constants/strings";
-import { COLORS } from "../../constants/colors";
 import { STORAGE_KEYS } from "../../constants/configs";
 import { getLocalDataAsync } from "../../helpers/storage";
 
@@ -68,12 +67,28 @@ function WalletPhrase(props) {
       cancelText: "Go Back",
       cancelButtonProps: {
         style: {
-          backgroundColor: COLORS.ORANGE_PRIMARY, borderColor: COLORS.ORANGE_PRIMARY, color: "#fff"
+          backgroundColor: "#ffffff",
+          border: "1px solid #8c8c8c",
+          color: "rgba(0, 0, 0, 0.88)",
+          fontWeight: 600,
+          fontSize: "14px",
+          height: "36px",
+          lineHeight: "36px",
+          padding: "0 16px",
+          borderRadius: "9px",
         }
       },
       okButtonProps: {
         style: {
-          backgroundColor: "#fff", borderColor: "#333", borderWidth: ".1px", color: "#000"
+          backgroundColor: "#ffffff",
+          border: "1px solid #dc3545",
+          color: "#dc3545",
+          fontWeight: 600,
+          fontSize: "14px",
+          height: "36px",
+          lineHeight: "36px",
+          padding: "0 16px",
+          borderRadius: "9px",
         }
       },
       onOk() {
