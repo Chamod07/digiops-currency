@@ -213,7 +213,7 @@
 
 .ant-btn.primary-button.scan-primary-button,
 .ant-btn.primary-button.scan-primary-button:not(:disabled) {
-  height: 48px !important;
+  height: 60px !important;
   font-size: 15px !important;
   font-weight: 600 !important;
   border-radius: 8px !important;
