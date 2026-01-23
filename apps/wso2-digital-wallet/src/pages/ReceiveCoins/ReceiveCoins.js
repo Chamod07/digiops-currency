@@ -197,6 +197,15 @@ function ReceiveCoins() {
             with the sender
           </div>
 
+          <div className="wallet-address-container">
+            <div className="wallet-address-label">
+              Coins will be received to this wallet address
+            </div>
+            <div className="wallet-address-display">
+              {walletAddress}
+            </div>
+          </div>
+
           <div className="amount-input-container">
             <div className="amount-label">{AMOUNT_TO_RECEIVE}</div>
             <div className="amount-input-wrapper">
@@ -252,7 +261,7 @@ function ReceiveCoins() {
               </div>
               <div className="qr-info-divider"></div>
               <div className="qr-info-item">
-                <span className="qr-info-label">Wallet Address</span>
+                <span className="qr-info-label">Your Wallet Address</span>
                 <span className="qr-info-value wallet-address-text">
                   {walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}
                 </span>
