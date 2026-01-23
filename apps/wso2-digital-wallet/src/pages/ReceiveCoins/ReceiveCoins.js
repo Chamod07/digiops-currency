@@ -199,10 +199,13 @@ function ReceiveCoins() {
 
           <div className="wallet-address-container">
             <div className="wallet-address-label">
-              Coins will be received to this wallet address
+              Wallet Address
             </div>
             <div className="wallet-address-display">
               {walletAddress}
+            </div>
+            <div className="wallet-address-helper">
+              You will receive coins to this wallet
             </div>
           </div>
 
