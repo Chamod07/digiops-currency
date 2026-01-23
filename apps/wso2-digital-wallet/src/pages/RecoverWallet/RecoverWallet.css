@@ -24,6 +24,8 @@
 }
 
 .recover-wallet-content {
-  height: 75vh;
-  overflow-y: auto;
+  min-height: auto;
+  max-height: none;
+  overflow-y: visible;
+  padding-bottom: 40px;
 }

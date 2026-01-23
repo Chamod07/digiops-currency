@@ -17,4 +17,11 @@
 }
 .wallet-phrase {
     padding: 20px;
+    padding-bottom: 40px;
+}
+
+.wallet-phrase .create-wallet-content {
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding-bottom: 20px;
 }

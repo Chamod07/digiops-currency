@@ -55,7 +55,7 @@ function LayoutView() {
           {isShowNavBar ? <NavBar /> : <></>}
 
           <Layout className="site-layout">
-            <Content className="layout-content">
+            <Content className={`layout-content ${isShowFooter ? 'has-footer' : 'no-footer'}`}>
               <div className="mt-3 mx-auto">
                 <div>
                   <Pages />
