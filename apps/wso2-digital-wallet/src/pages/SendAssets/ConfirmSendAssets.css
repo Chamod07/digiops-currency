@@ -166,14 +166,14 @@
 }
 
 /* Button Group */
-.button-group {
+.confirm-send-container .button-group {
   display: flex;
   gap: 12px;
   width: 100%;
   margin-bottom: 24px;
 }
 
-.button-group .default-button,
-.button-group .primary-button {
+.confirm-send-container .button-group .default-button,
+.confirm-send-container .button-group .primary-button {
   flex: 1;
 }

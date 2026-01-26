@@ -55,7 +55,6 @@ function ReceiveCoins() {
       );
       if (
         walletAddressResponse &&
-        walletAddressResponse !== null &&
         walletAddressResponse !== DEFAULT_WALLET_ADDRESS &&
         typeof walletAddressResponse === "string" &&
         walletAddressResponse.length > 2

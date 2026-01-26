@@ -56,7 +56,7 @@
 }
 
 .action-buttons .gap-2 {
-    gap: 10px;
+    gap: 10px !important;
 }
 /* .recent-activities-widget {    
     background: red;

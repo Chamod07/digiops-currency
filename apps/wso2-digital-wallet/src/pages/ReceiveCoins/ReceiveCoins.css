@@ -18,14 +18,14 @@
   align-items: center;
 }
 
-.back-button {
+.receive-coins-container .back-button {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   gap: 4px;
 }
 
-.back-button .anticon {
+.receive-coins-container .back-button .anticon {
   display: flex;
   align-items: center;
 }
@@ -122,7 +122,7 @@
   border-color: #ff7400;
 }
 
-.amount-input {
+.receive-coins-container .amount-input {
   flex: 1;
   border: none !important;
   font-size: 28px;
@@ -132,7 +132,7 @@
   box-shadow: none !important;
 }
 
-.amount-input .ant-input {
+.receive-coins-container .amount-input .ant-input {
   border: none !important;
   font-size: 28px;
   font-weight: 600;
@@ -141,11 +141,11 @@
   box-shadow: none !important;
 }
 
-.amount-input .ant-input:focus {
+.receive-coins-container .amount-input .ant-input:focus {
   box-shadow: none !important;
 }
 
-.currency-badge {
+.receive-coins-container .currency-badge {
   display: flex;
   align-items: center;
   gap: 8px;
