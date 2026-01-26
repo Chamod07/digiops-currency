@@ -14,6 +14,7 @@ import ConfirmSendAssets from "./SendAssets/ConfirmSendAssets";
 import RecoverWallet from "./RecoverWallet/RecoverWallet";
 import Profile from "./Profile/Profile";
 import History from "./History/History";
+import ReceiveCoins from "./ReceiveCoins/ReceiveCoins";
 
 function Pages() {
   return (
@@ -21,6 +22,7 @@ function Pages() {
       <Route path="/" exact element={<Home />} />
       <Route path="/create-wallet" exact element={<CreateWallet />} />
       <Route path="/send" exact element={<SendAssets />} />
+      <Route path="/receive" exact element={<ReceiveCoins />} />
       <Route path="/confirm-assets-send" exact element={<ConfirmSendAssets />} />
       <Route path="/recover-wallet" exact element={<RecoverWallet />} />
       <Route path="/profile" exact element={<Profile />} />

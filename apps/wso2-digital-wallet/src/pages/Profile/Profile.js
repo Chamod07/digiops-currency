@@ -210,7 +210,9 @@ function Profile() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
             <QRCodeSVG
-              value={walletAddress}
+              value={JSON.stringify({
+                wallet_address: walletAddress
+              })}
               size={200}
               level="M"
             />
@@ -246,14 +248,13 @@ function Profile() {
         <div className="profile-title">Public Wallet Address</div>
         <div className="d-flex justify-content-center mt-2">
           <Button
-            type="primary"
-            className="primary-button"
+            className="secondary-button"
             icon={<QrcodeOutlined />}
             onClick={() => setIsQrModalOpen(true)}
             style={{
               borderRadius: '6px',
               fontSize: '15px',
-              fontWeight: '700',
+              fontWeight: '500',
               padding: '0 24px',
               display: 'flex',
               alignItems: 'center',

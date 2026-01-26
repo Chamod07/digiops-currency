@@ -6,12 +6,10 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 
 import React, { useState, useEffect } from "react";
-import Identicon from "identicon.js";
-import { SHA256 } from "crypto-js";
 import { Avatar, Button } from "antd";
-import { Col, Row } from "reactstrap";
 import Wso2MainImg from "../../assets/images/wso2_main.png";
 import { useNavigate } from "react-router-dom";
+import "./ConfirmSendAssets.css";
 import { getLocalDataAsync, saveLocalDataAsync } from "../../helpers/storage";
 import { transferToken } from "../../services/blockchain.service";
 import { getEllipsisTxt } from "../../helpers/formatter";
@@ -23,7 +21,8 @@ import {
   ERROR_BRIDGE_NOT_READY,
   OK,
   SUCCESS,
-  SUCCESS_TOKEN_TRANSFER
+  SUCCESS_TOKEN_TRANSFER,
+  WSO2_TOKEN
 } from "../../constants/strings";
 import { STORAGE_KEYS } from "../../constants/configs";
 import { showToast, showAlertBox } from "../../helpers/alerts";
@@ -62,18 +61,9 @@ function ConfirmSendAssets() {
     fetchLocalTxDetails();
   }, []);
 
-  const generateAvatar = (seed) => {
-    const options = {
-      size: 80 // Adjust the size of the identicon image
-    };
-    const hash = SHA256(seed).toString();
-    const data = new Identicon(hash.slice(0, 15), options).toString();
-    return "data:image/png;base64," + data;
-  };
-
   const handleReject = async () => {
     await resetInputFields();
-    navigate("/");
+    navigate("/send");
   };
 
   const resetInputFields = async () => {
@@ -111,63 +101,74 @@ function ConfirmSendAssets() {
     }
   };
 
-  const avatar1Url = generateAvatar("avatar1");
-  const avatar2Url = generateAvatar("avatar2");
-
   return (
-    <div className="mx-4">
-      <Row>
-        <Col span={12}>
-          <div style={{ textAlign: "left" }} className="d-flex">
-            <Avatar size={40} src={avatar1Url} />
-            <div className="d-flex flex-column">
-              <span style={{ marginLeft: "10px" }}>From</span>
-              <span style={{ marginLeft: "10px" }}>
-                {getEllipsisTxt(fromAddress, 5)}{" "}
-              </span>
-            </div>
-          </div>
-        </Col>
-        <Col span={12}>
-          <div style={{ textAlign: "left" }} className="d-flex">
-            <Avatar size={40} src={avatar2Url} />
-            <div className="d-flex flex-column">
-              <span style={{ marginLeft: "10px" }}>To</span>
-              <span style={{ marginLeft: "10px" }}>
-                {getEllipsisTxt(senderAddress, 5)}{" "}
-              </span>
-            </div>
-          </div>
-        </Col>
-      </Row>
-      <div className="d-flex flex-column mt-3 sending-details">
-        <span className="sending-wso2">SENDING WSO2</span>
-        <div className="d-flex justify-content-start mt-2">
-          <Avatar size={20} src={Wso2MainImg} />
-          <span className="send-coin-balance mx-1">{sendAmount}</span>
+    <div className="confirm-send-container">
+      <div className="confirm-header-section">
+        <span className="confirm-header">Review Transaction</span>
+      </div>
+
+      <div className="confirm-content">
+        {/* Hero Amount Display */}
+        <div className="amount-hero">
+          <div className="amount-subtitle">You're sending</div>
+          <div className="amount-value">{sendAmount}</div>
+          <div className="amount-currency">{WSO2_TOKEN}</div>
         </div>
-      </div>
-      <div className="d-flex justify-content-between mt-5">
-        <span className="">Total</span>
-        <span className="">{sendAmount} WSO2</span>
-      </div>
-      <Row className="send-button-section">
-        <Col md="6" sm="6">
-          <Button block className="default-button mt-2" onClick={handleReject}>
-            Reject
-          </Button>
-        </Col>
-        <Col md="6" sm="6">
+
+        {/* Transaction Flow - Compact Horizontal */}
+        <div className="transaction-flow">
+          <div className="flow-item from-item">
+            <div className="flow-details">
+              <span className="flow-label">From</span>
+              <span className="flow-address">{getEllipsisTxt(fromAddress, 6)}</span>
+            </div>
+          </div>
+          
+          <div className="flow-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8c8c8c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+
+          <div className="flow-item to-item">
+            <div className="flow-details">
+              <span className="flow-label">To</span>
+              <span className="flow-address">{getEllipsisTxt(senderAddress, 6)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Total Section - Single Line */}
+        <div className="total-section">
+          <span className="total-label">Total</span>
+          <div className="total-amount-container">
+            <span className="total-amount">{sendAmount}</span>
+            <div className="currency-badge">
+              <Avatar size={24} src={Wso2MainImg} />
+              <span>{WSO2_TOKEN}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="button-group">
           <Button
+            className="default-button"
+            onClick={handleReject}
             block
-            className="primary-button mt-2"
+          >
+            Cancel
+          </Button>
+          <Button
+            className="primary-button"
             loading={isTransferLoading}
             onClick={handleConfirm}
+            block
           >
-            Confirm
+            Confirm & Send
           </Button>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </div>
   );
 }

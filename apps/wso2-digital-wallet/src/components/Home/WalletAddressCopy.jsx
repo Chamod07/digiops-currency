@@ -49,7 +49,8 @@ function WalletAddressCopy(props) {
                 justifyContent: 'center',
                 gap: '6px',
                 minWidth: '160px',
-                padding: '0 20px'
+                padding: '0 20px',
+                fontWeight: 500
               }}
             >
               {buttonText}

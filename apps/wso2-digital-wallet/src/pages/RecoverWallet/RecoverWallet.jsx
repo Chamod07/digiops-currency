@@ -42,8 +42,9 @@ export default function RecoverWallet() {
 
   const handleInputChange = (index, value) => {
     let newWordList = [...wordList];
-    if (value && value.trim().split(' ').length === PASS_PHRASE_LENGTH) {
-      const words = value.trim().split(' ');
+    const words = value.trim().split(/\s+/).filter(word => word.length > 0);
+    if (words.length === PASS_PHRASE_LENGTH) {
+      // If 12 words detected, fill all boxes
       for (let i = 0; i < Math.min(words.length, 12); i++) {
         newWordList[i] = words[i];
       }
@@ -53,6 +54,25 @@ export default function RecoverWallet() {
     setWordList(newWordList);
     const allWordsFilled = newWordList.filter(word => word && word.trim()).length === PASS_PHRASE_LENGTH;
     setContinueRecover(allWordsFilled);
+  };
+
+  const handlePaste = (index, e) => {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    const words = pastedText.trim().split(/\s+/).filter(word => word.length > 0);
+    
+    if (words.length === PASS_PHRASE_LENGTH) {
+      // If 12 words pasted, fill all boxes
+      let newWordList = [...wordList];
+      for (let i = 0; i < Math.min(words.length, 12); i++) {
+        newWordList[i] = words[i];
+      }
+      setWordList(newWordList);
+      const allWordsFilled = newWordList.filter(word => word && word.trim()).length === PASS_PHRASE_LENGTH;
+      setContinueRecover(allWordsFilled);
+    } else {
+      handleInputChange(index, pastedText);
+    }
   };
 
   const handleRecover = () => {
@@ -84,14 +104,14 @@ export default function RecoverWallet() {
   const renderInputs = () => {
     const inputs = [];
     for (let i = 0; i < 12; i++) {
-      const formattedNumber = (i + 1 < 10) ? `${i + 1}&nbsp;` : (i + 1).toString();
       inputs.push(
         <Col md="6" sm="6" xs="6" key={i}>
           <div className="input-container mt-2">
-            <label className="input-label" dangerouslySetInnerHTML={{ __html: formattedNumber }} />
+            <label className="input-label">{i + 1}</label>
             <Input
               value={wordList[i]}
               onChange={(event) => handleInputChange(i, event.target.value)}
+              onPaste={(e) => handlePaste(i, e)}
             />
           </div>
         </Col>

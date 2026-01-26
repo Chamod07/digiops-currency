@@ -1,0 +1,179 @@
+/* 
+// Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+//
+// This software is the property of WSO2 LLC. and its suppliers, if any.
+// Dissemination of any information or reproduction of any material contained
+// herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+// You may not alter or remove any copyright or other notice from copies of this content.
+*/
+
+.confirm-send-container {
+  padding: 0 16px;
+  min-height: calc(100vh - 150px);
+  padding-bottom: 100px;
+}
+
+.confirm-header-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.confirm-header {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Confirm Content */
+.confirm-content {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Hero Amount Display */
+.amount-hero {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 0 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.amount-value {
+  font-size: 42px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+.amount-currency {
+  font-size: 18px;
+  font-weight: 600;
+  color: #8c8c8c;
+  margin-top: 2px;
+}
+
+/* Transaction Flow - Horizontal Compact */
+.transaction-flow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+}
+
+.flow-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.flow-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.flow-label {
+  font-size: 12px;
+  color: #8c8c8c;
+  font-weight: 400;
+}
+
+.flow-address {
+  font-size: 13px;
+  color: #1a1a1a;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+
+/* Total Section */
+.total-section {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  margin-bottom: 32px;
+}
+
+.total-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.total-amount-container {
+  display: flex;
+  align-items: center;
+}
+
+.total-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.total-amount-container .currency-badge {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 12px !important;
+  background: #f1f1f1 !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #212529 !important;
+  margin-left: 12px !important;
+}
+
+/* Button Group */
+.confirm-send-container .button-group {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.confirm-send-container .button-group .default-button,
+.confirm-send-container .button-group .primary-button {
+  flex: 1;
+}

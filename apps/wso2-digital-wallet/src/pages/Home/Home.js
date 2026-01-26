@@ -21,7 +21,7 @@ import {
 import { NumericFormat } from 'react-number-format';
 import { useNavigate } from 'react-router-dom';
 
-import { LoadingOutlined, SendOutlined } from '@ant-design/icons';
+import { LoadingOutlined, SendOutlined, DownloadOutlined } from '@ant-design/icons';
 
 import RecentActivities from '../../components/Home/RecentActivities';
 import { COLORS } from '../../constants/colors';
@@ -33,7 +33,8 @@ import {
   ERROR,
   ERROR_RETRIEVE_WALLET_ADDRESS,
   ERROR_BRIDGE_NOT_READY,
-  SEND_COINS,
+  SEND,
+  REQUEST,
   SUCCESS,
   TOTAL_BALANCE,
   WALLET_ADDRESS_COPIED,
@@ -100,6 +101,10 @@ function Home() {
     navigate("/send");
   };
 
+  const handleReceive = () => {
+    navigate("/receive");
+  };
+
   useEffect(() => {
     if (!walletAddress || walletAddress?.length === 0) {
       navigate("/create-wallet");
@@ -151,20 +156,37 @@ function Home() {
             </Tag>
           </Tooltip>
         </CopyToClipboard> */}
-        <div className="send-button pt-3">
-          <Button 
-            className="primary-button container" 
-            onClick={handleSend}
-            icon={<SendOutlined />}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-          >
-            {SEND_COINS}
-          </Button>
+        <div className="action-buttons pt-3">
+          <div className="d-flex gap-2">
+            <Button 
+              className="primary-button" 
+              onClick={handleSend}
+              icon={<SendOutlined />}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                flex: 1
+              }}
+            >
+              {SEND}
+            </Button>
+            <Button 
+              className="default-button" 
+              onClick={handleReceive}
+              icon={<DownloadOutlined />}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                flex: 1
+              }}
+            >
+              {REQUEST}
+            </Button>
+          </div>
         </div>
         {/* <div className="d-flex justify-content-between mt-4">
           <div>

@@ -27,7 +27,10 @@ function LayoutView() {
       location.pathname === "/wallet-phrase" ||
       location.pathname === "/recover-wallet" ||
       location.pathname === "/history" ||
-      location.pathname === "/profile"
+      location.pathname === "/profile" ||
+      location.pathname === "/send" ||
+      location.pathname === "/receive" ||
+      location.pathname === "/confirm-assets-send"
     ) {
       setIsShowNavBar(false);
     } else {
@@ -52,7 +55,7 @@ function LayoutView() {
           {isShowNavBar ? <NavBar /> : <></>}
 
           <Layout className="site-layout">
-            <Content className="layout-content">
+            <Content className={`layout-content ${isShowFooter ? 'has-footer' : 'no-footer'}`}>
               <div className="mt-3 mx-auto">
                 <div>
                   <Pages />

@@ -13,11 +13,17 @@ export const NOT_CONNECTED = "Not Connected";
 
 // home page
 export const TOTAL_BALANCE = "Total Balance";
-export const SEND_COINS = "Send Coins";
+export const SEND = "Send";
 export const REQUEST = "Request";
-export const BUY = "Buy";
 export const RECENT_ACTIVITIES = "Recent Activities";
-export const WSO2_TOKEN = "WSO2";
+export const WSO2_TOKEN = "O2C";
+
+// receive coins page
+export const RECEIVE_COINS_TITLE = "Request Coins";
+export const AMOUNT_TO_RECEIVE = "Amount to Receive";
+export const GENERATE_QR_CODE = "Generate QR Code";
+export const SHARE_QR_CODE = "Share";
+export const DOWNLOAD_QR_CODE = "Download";
 
 // footer
 export const WALLET = "Wallet";
@@ -34,7 +40,7 @@ export const WALLET_ADDRESS_COPIED = "Your wallet address has been copied to cli
 // recover wallet
 export const RECOVER_WALLET = "Recover Wallet";
 export const RECOVER_WALLET_ERROR = "Error recovering wallet";
-export const PASTE_PHRASE_HERE = "Paste your 12 words seed phrase here";
+export const PASTE_PHRASE_HERE = "Paste your 12 words recovery phrase here";
 export const RECOVER_YOUR_WALLET = "Recover Your Wallet";
 export const SHOW_WALLET_ADDRESS = "Show Wallet Address";
 
@@ -56,7 +62,7 @@ export const WALLET_SECURE_TIPS = [
 export const CONFIRM_RECOVERY_PHRASE = "Have you securely stored your recovery phrase? This phrase is required to restore access to your wallet. It cannot be recovered if lost, and losing it may result in permanent loss of access to your wallet.";
 
 export const OK = "Ok";
-export const ERROR = "Error";
+export const ERROR = "Oops!";
 export const SUCCESS = "Success";
 export const COPIED = "Copied!";
 
@@ -65,16 +71,16 @@ export const ERROR_RETRIEVE_WALLET_ADDRESS = "Can not retrieve wallet address";
 export const ERROR_RETRIEVE_PRIVATE_KEY = "Can not retrieve private key";
 export const ERROR_READING_WALLET_DETAILS = "Something went wrong while reading wallet details";
 export const ERROR_WHEN_LOGGING_OUT = "Error when logging out";
-export const ERROR_WHEN_COPPING_DATA = "Error when copping to clipboard";
+export const ERROR_WHEN_COPPING_DATA = "Error when copying to clipboard";
 export const ERROR_FETCHING_LOCAL_TX_DETAILS = "Error when fetching local transactions details";
 export const ERROR_RESETTING_TX_VALUES = "Error when resetting tx values";
 export const ERROR_SAVING_TX_DETAILS = "Error when saving transaction details";
-export const ERROR_CREATING_WALLET = "Something went wrong when creating wallet";
-export const ERROR_TRANSFERRING_TOKEN = "Something went wrong when transferring token";
+export const ERROR_CREATING_WALLET = "Something went wrong when creating wallet. Please try again.";
+export const ERROR_TRANSFERRING_TOKEN = "Something went wrong when transferring coins. Please try again.";
 
 export const ERROR_BRIDGE_NOT_READY =
   "Bridge not ready, please try again later";
 
 // Success messages
-export const SUCCESS_TOKEN_TRANSFER = "Token has been transferred successfully";
-export const SUCCESS_WALLET_CREATED = "Wallet has been created successfully";
+export const SUCCESS_TOKEN_TRANSFER = "Coins have been transferred successfully!";
+export const SUCCESS_WALLET_CREATED = "Wallet has been created successfully!";

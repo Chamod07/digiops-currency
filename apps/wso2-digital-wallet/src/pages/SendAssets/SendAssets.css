@@ -11,78 +11,312 @@
     font-size: 18px;
     font-weight: 600;
 }
-.send-coin-name {
-    font-size: 18px;
-    font-weight: 500;
+
+.back-button {
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px;
 }
-.send-coin-balance {
-    font-size: 13px;
-    font-weight: 500;
+
+.back-button .anticon {
+  display: flex;
+  align-items: center;
 }
-.send-coin-info {
-    display: flex;
-    align-items: center;
-    border: 1px black solid;
-    padding: 5px;
-    border-radius: 8px;
-  }
+
+/* Form Section */
+.form-section {
+  margin-top: 0;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.field-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.section-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.error-text {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+  text-align: left;
+}
+
+/* Asset Section */
+.asset-section {
+  margin-top: 24px;
+  margin-bottom: 20px;
+}
+
+.asset-info-card {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 12px 14px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+}
+
+.asset-info-card .ant-avatar {
+  margin-right: 12px;
+}
+
+.asset-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.asset-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
+}
+
+.asset-balance {
+  font-size: 13px;
+  color: #737373;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  text-align: left;
+}
+
+/* Amount Section */
+.amount-section {
+  margin-bottom: 32px;
+}
+
+.helper-text {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 6px;
+  display: block;
+  text-align: left;
+}
+
+.amount-input.ant-input-affix-wrapper {
+  width: 100%;
+  height: 50px !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 8px 12px !important;
+  border: 1px solid #d9d9d9 !important;
+  background-color: #ffffff !important;
+}
+
+.amount-input.ant-input-affix-wrapper-focused {
+  border-color: #ff7400 !important;
+  box-shadow: 0 0 0 2px rgba(255, 116, 0, 0.1);
+}
+
+.amount-input .ant-input {
+  height: 100% !important;
+  font-size: 15px !important;
+  color: #1a1a1a !important;
+}
+
+.amount-input .ant-input::placeholder {
+  color: #bfbfbf;
+  font-size: 15px;
+}
+
+.amount-input .ant-input-suffix {
+  font-size: 14px !important;
+  color: #595959;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.amount-input.ant-input-affix-wrapper-disabled {
+  background-color: #f5f5f5 !important;
+  border-color: #d9d9d9 !important;
+  cursor: not-allowed;
+}
+
+.amount-input.ant-input-affix-wrapper-disabled .ant-input {
+  color: #bfbfbf !important;
+  background-color: transparent !important;
+}
+
+.amount-input.ant-input-affix-wrapper-disabled .ant-input::placeholder {
+  color: #d9d9d9 !important;
+}
+
+.amount-input.ant-input-affix-wrapper-disabled .ant-input-suffix {
+  color: #bfbfbf !important;
+}
+
+/* No more opacity-based disabled sections - cleaner UX */
+
+/* Button Group */
+.button-group {
+  margin-top: 36px;
+  margin-bottom: 24px;
+}
+
+.next-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 9px;
+  width: 100%;
+  background-color: #ff7400 !important;
+  border-color: #ff7400 !important;
+}
+
+.next-button:disabled,
+.ant-btn.next-button:disabled,
+.ant-btn[disabled].next-button {
+  background: #e9ecef !important;
+  color: #6c757d !important;
+  border: 1px solid #ced4da !important;
+  opacity: 1;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+/* Scan Section */
+.scan-section {
+  margin-top: 32px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ant-btn.primary-button.scan-primary-button,
+.ant-btn.primary-button.scan-primary-button:not(:disabled) {
+  height: 60px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 0 32px !important;
+  min-width: 180px;
+}
+
+.ant-btn.primary-button.scan-primary-button .anticon,
+.scan-primary-button .anticon {
+  font-size: 18px !important;
+}
+
+.or-divider {
+  text-align: center;
+  margin: 28px 0;
+  position: relative;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 43%;
+  height: 1px;
+  background: #d9d9d9;
+}
+
+.or-divider::before {
+  left: 0;
+}
+
+.or-divider::after {
+  right: 0;
+}
+
+.or-divider span {
+  background: #f3f5f6;
+  padding: 0 16px;
+  color: #8c8c8c;
+  font-size: 13px;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+/* Wallet Address Input */
+.wallet-search-input.ant-input-affix-wrapper {
+  height: 50px !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 8px 12px !important;
+  border: 1px solid #d9d9d9 !important;
+  background-color: #ffffff !important;
+}
+
+.wallet-search-input.ant-input-affix-wrapper .ant-input {
+  height: 100% !important;
+  font-size: 15px !important;
+  color: #1a1a1a !important;
+}
+
+.wallet-search-input .ant-input::placeholder {
+  color: #bfbfbf;
+  font-size: 15px;
+}
+
+.wallet-search-input .ant-input-prefix {
+  font-size: 16px;
+  color: #8c8c8c;
+  margin-right: 8px;
+}
+
+.wallet-search-input.ant-input-affix-wrapper-focused {
+  border-color: #ff7400 !important;
+  box-shadow: 0 0 0 2px rgba(255, 116, 0, 0.1);
+}
+
+/* Shared Input Styling */
+.wallet-search-input.ant-input-affix-wrapper,
+.amount-input.ant-input-affix-wrapper {
+  font-family: inherit;
+}
+
+.wallet-search-input .ant-input,
+.amount-input .ant-input {
+  line-height: 1.5;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input::placeholder {
+  text-align: left !important;
+}
   
-  .send-coin-details {
-    margin-left: 8px; /* Adjust the spacing between the image and text */
-  }
-  .asset-column {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-  }
-  
-  .asset-content {
-    text-align: center;
-    margin-left: 10px;
-    font-size: 18px;
-    font-weight: 500;
-  }
-  .wallet-search-input.ant-input-affix-wrapper {
-    height: 50px !important;
-    border-radius: 9px !important;
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 12px !important;
-  }
-  .wallet-search-input.ant-input-affix-wrapper .ant-input {
-    height: 100% !important;
-  }
-  .send-coin-input-card {
-    border: 1px black solid;
-    padding: 5px;
-    border-radius: 8px;
-  }
-  
-  .send-button-section {
-    margin-top: 10px;
-  }
-  .send-coin-input {
-    border: none;
-    padding: 5px;
-    border-radius: 8px;
-    background-color: #f3f5f6;
-  }
-  .send-coin-input .ant-input {
-    background-color: #f3f5f6 !important;
-  }
-  .send-coin-input .ant-input-affix-wrapper {
-    border: none !important;
-  }
-  .sending-wso2 {
-    padding: 3px;
-    border: 1px rgba(0, 0, 0, 0.332) solid;
-    border-radius: 5px;
-    font-size: 12px;
-  }
-  
-  .ant-input,
-  .ant-input-affix-wrapper,
-  .ant-input::placeholder {
-    text-align: left !important;
-  }
   
