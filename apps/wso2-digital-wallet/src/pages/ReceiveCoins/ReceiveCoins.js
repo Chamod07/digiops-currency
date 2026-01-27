@@ -134,7 +134,6 @@ function ReceiveCoins() {
               
               const shareData = {
                 files: [file],
-                title: `Receive ${receiveAmount} ${WSO2_TOKEN}`,
               };
 
               try {
@@ -225,7 +224,7 @@ function ReceiveCoins() {
             <div className="amount-input-wrapper">
               <Input
                 className="amount-input"
-                placeholder="0.00"
+                placeholder="0"
                 value={receiveAmount}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -271,7 +270,13 @@ function ReceiveCoins() {
             <div className="qr-code-info">
               <div className="qr-info-item">
                 <span className="qr-info-label">Amount</span>
-                <span className="qr-info-value">{receiveAmount} {WSO2_TOKEN}</span>
+                <div className="qr-info-value-container">
+                  <span className="qr-info-value">{receiveAmount}</span>
+                  <div className="currency-badge">
+                    <Avatar size={24} src={Wso2MainImg} />
+                    <span>{WSO2_TOKEN}</span>
+                  </div>
+                </div>
               </div>
               <div className="qr-info-divider"></div>
               <div className="qr-info-item">
