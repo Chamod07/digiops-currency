@@ -125,25 +125,37 @@ function ReceiveCoins() {
         canvas.toBlob(async (blob) => {
           try {
             // Use Web Share API
-            if (navigator.share && navigator.canShare) {
+            if (navigator.share) {
               const file = new File(
                 [blob],
                 `receive-${receiveAmount}-${WSO2_TOKEN}.png`,
                 { type: "image/png" },
               );
+              
               const shareData = {
                 files: [file],
                 title: `Receive ${receiveAmount} ${WSO2_TOKEN}`,
-                text: `Scan this QR code to send ${receiveAmount} ${WSO2_TOKEN} tokens`,
               };
 
-              if (navigator.canShare(shareData)) {
-                await navigator.share(shareData);
+              try {
+                // Check if canShare is available
+                if (navigator.canShare && navigator.canShare(shareData)) {
+                  await navigator.share(shareData);
+                } else {
+                  await navigator.share(shareData);
+                }
                 messageApi.success("QR code shared successfully");
-              } else {
-                messageApi.warning(
-                  "QR Code sharing is not supported on this device.",
-                );
+              } catch (shareError) {
+                // If sharing with files fails
+                if (shareError.name === "AbortError") {
+                  // User cancelled
+                  console.log("Share cancelled by user");
+                } else {
+                  console.error("Error sharing QR code:", shareError);
+                  messageApi.warning(
+                    "QR Code sharing is not supported on this device.",
+                  );
+                }
               }
             } else {
               messageApi.warning(
