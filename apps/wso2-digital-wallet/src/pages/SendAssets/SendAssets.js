@@ -306,7 +306,7 @@ function SendAssets() {
         </div>
 
         <div className="asset-section">
-          <div className="section-label">Asset</div>
+          <div className="section-label">Wallet Balance</div>
           <div className="asset-info-card">
             <Avatar size={48} src={Wso2MainImg} />
             <div className="asset-details">
@@ -326,19 +326,24 @@ function SendAssets() {
 
         <div className="amount-section">
           <div className="field-label">Amount</div>
-          <Input
-            className="amount-input"
-            placeholder="0"
-            suffix={WSO2_TOKEN}
-            value={sendAmount}
-            disabled={!isValidWalletAddress}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^\d*(\.\d*)?$/.test(value)) {
-                setSendAmount(value);
-              }
-            }}
-          />
+          <div className="amount-input-wrapper">
+            <Input
+              className="amount-input"
+              placeholder="0"
+              value={sendAmount}
+              disabled={!isValidWalletAddress}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*(\.\d*)?$/.test(value)) {
+                  setSendAmount(value);
+                }
+              }}
+            />
+            <div className="currency-badge">
+              <Avatar size={24} src={Wso2MainImg} />
+              <span>{WSO2_TOKEN}</span>
+            </div>
+          </div>
           {!isValidWalletAddress && (
             <span className="helper-text">Enter a valid wallet address first</span>
           )}

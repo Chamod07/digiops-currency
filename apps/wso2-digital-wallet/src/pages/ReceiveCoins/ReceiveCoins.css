@@ -157,6 +157,18 @@
   margin-left: 12px;
 }
 
+.qr-code-info .currency-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #212529;
+  margin-left: 2px;
+}
+
 .generate-qr-button {
   width: 100%;
   max-width: 400px;
@@ -234,6 +246,12 @@
   color: #6c757d;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.qr-info-value-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .qr-info-value {
