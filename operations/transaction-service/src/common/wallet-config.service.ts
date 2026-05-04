@@ -7,6 +7,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 export interface WalletConfig {
   PUBLIC_WALLET_ADDRESS: string;
@@ -19,7 +20,7 @@ export class WalletConfigService {
   private readonly logger = new Logger(WalletConfigService.name);
   getWalletConfig(clientId: string): WalletConfig | undefined {
     try {
-      const configPath = '/src/config/client-address-mapping.json';
+      const configPath = join(process.cwd(), 'src/config/client-address-mapping.json');
       if (!existsSync(configPath)) {
         this.logger.warn(`Wallet config file not found at ${configPath}`);
         return undefined;

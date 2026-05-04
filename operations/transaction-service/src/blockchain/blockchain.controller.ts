@@ -22,6 +22,8 @@ import { MasterWalletBalanceResponseDto } from './dto/master-wallet-balance-resp
 import { WalletBalanceByAddressResponseDto } from './dto/wallet-balance-response.dto';
 import { TokenTransferResponseDto } from './dto/token-transfer-response.dto';
 import { TransactionDetailsResponseDto } from './dto/transaction-details-response.dto';
+import { BrowseTransactionsDto } from './dto/browse-transactions.dto';
+import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
 import { 
   ApiBody,
   ApiOperation,
@@ -151,6 +153,41 @@ export class BlockchainController {
         transferTokenDto.recipientWalletAddress,
         transferTokenDto.amount,
       );
+      return response
+        .status(HttpStatus.OK)
+        .json(
+          this.httpResponseService.send(
+            this.httpResponseService.SUCCESS,
+            HttpStatus.OK,
+            result,
+          ),
+        );
+    } catch (error) {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .json(
+          this.httpResponseService.send(
+            error.message || this.httpResponseService.ERROR,
+            HttpStatus.BAD_REQUEST,
+            null,
+          ),
+        );
+    }
+  }
+
+  @Post('transactions/search')
+  @ApiOperation({ summary: 'Search Transfer events with optional filters and pagination' })
+  @ApiBody({ type: BrowseTransactionsDto, description: 'Optional filters and pagination parameters' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved transactions.',
+    type: TransactionListResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 500, description: 'Server Error.' })
+  async browseTransactions(@Body() dto: BrowseTransactionsDto, @Res() response) {
+    try {
+      const result = await this.blockchainService.browseTransactions(dto);
       return response
         .status(HttpStatus.OK)
         .json(

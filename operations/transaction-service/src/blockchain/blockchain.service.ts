@@ -148,6 +148,113 @@ export class BlockchainService {
     };
   };
 
+  /**
+   * Binary-searches the chain for the block whose timestamp is closest to targetTimestamp.
+   * O(log n) RPC calls — ~20 calls for a million-block chain.
+   */
+  private findBlockByTimestamp = async (
+    provider: ethers.JsonRpcProvider,
+    targetTimestamp: number,
+    low: number,
+    high: number,
+  ): Promise<number> => {
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      const block = await provider.getBlock(mid);
+      if (!block || block.timestamp < targetTimestamp) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    return low;
+  };
+
+  browseTransactions = async (filters: {
+    senderAddress?: string;
+    receiverAddress?: string;
+    transactionHash?: string;
+    startTime?: string;
+    endTime?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const provider = await this.getWeb3Provider();
+    const contract = new ethers.Contract(
+      blockchainConfigs.contractAddress,
+      blockchainConfigs.contractAbi,
+      provider,
+    );
+
+    const latestBlock = await provider.getBlockNumber();
+
+    // Resolve time filters to block boundaries via binary search (O(log n) RPC calls).
+    // Without time filters this is a single eth_getLogs call across the full chain.
+    let toBlock = latestBlock;
+    let fromBlock = 0;
+
+    if (filters.endTime) {
+      const endTs = Math.floor(new Date(filters.endTime).getTime() / 1000);
+      toBlock = Math.min(latestBlock, await this.findBlockByTimestamp(provider, endTs, 0, latestBlock));
+    }
+    if (filters.startTime) {
+      const startTs = Math.floor(new Date(filters.startTime).getTime() / 1000);
+      fromBlock = await this.findBlockByTimestamp(provider, startTs, 0, toBlock);
+    }
+
+    const eventFilter = contract.filters.Transfer(
+      filters.senderAddress ?? null,
+      filters.receiverAddress ?? null,
+    );
+
+    // Single eth_getLogs call across the resolved block range.
+    let events = (await contract.queryFilter(eventFilter, fromBlock, toBlock)) as ethers.EventLog[];
+
+    if (filters.transactionHash) {
+      events = events.filter((e) => e.transactionHash === filters.transactionHash);
+    }
+
+    // Newest first.
+    events = events.reverse();
+
+    const limit = filters.limit ?? 10;
+    const offset = filters.offset ?? 0;
+    const hasMore = events.length > offset + limit;
+    const paginated = events.slice(offset, offset + limit);
+
+    // Fetch block timestamps only for the events on the current page.
+    const blockCache = new Map<number, ethers.Block | null>();
+    const getBlock = async (blockNumber: number) => {
+      if (!blockCache.has(blockNumber)) {
+        try {
+          blockCache.set(blockNumber, await provider.getBlock(blockNumber));
+        } catch {
+          blockCache.set(blockNumber, null);
+        }
+      }
+      return blockCache.get(blockNumber) ?? null;
+    };
+
+    const decimals = Number(await contract.decimals());
+
+    const transactions = await Promise.all(
+      paginated.map(async (log) => {
+        const block = await getBlock(log.blockNumber);
+        return {
+          txHash: log.transactionHash,
+          blockNumber: log.blockNumber,
+          senderAddress: log.args[0] as string,
+          receiverAddress: log.args[1] as string,
+          amount: ethers.formatUnits(log.args[2], decimals),
+          amountRaw: (log.args[2] as bigint).toString(),
+          timestamp: block ? new Date(block.timestamp * 1000).toISOString() : null,
+        };
+      }),
+    );
+
+    return { hasMore, offset, limit, transactions };
+  };
+
   transferTokens = async (clientId: string, recipientWalletAddress: string, amount: number) => {
     const walletConfig = this.walletConfigService.getWalletConfig(clientId);
     if (!walletConfig) {
