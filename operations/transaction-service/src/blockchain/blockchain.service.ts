@@ -171,8 +171,8 @@ export class BlockchainService {
   };
 
   browseTransactions = async (filters: {
-    senderAddress?: string;
-    receiverAddress?: string;
+    senderAddresses?: string[];
+    receiverAddresses?: string[];
     transactionHash?: string;
     startTime?: string;
     endTime?: string;
@@ -202,10 +202,9 @@ export class BlockchainService {
       fromBlock = await this.findBlockByTimestamp(provider, startTs, 0, toBlock);
     }
 
-    const eventFilter = contract.filters.Transfer(
-      filters.senderAddress ?? null,
-      filters.receiverAddress ?? null,
-    );
+    const senders = filters.senderAddresses?.length ? filters.senderAddresses : null;
+    const receivers = filters.receiverAddresses?.length ? filters.receiverAddresses : null;
+    const eventFilter = contract.filters.Transfer(senders, receivers);
 
     // Single eth_getLogs call across the resolved block range.
     let events = (await contract.queryFilter(eventFilter, fromBlock, toBlock)) as ethers.EventLog[];
