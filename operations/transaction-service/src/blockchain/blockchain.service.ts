@@ -202,6 +202,10 @@ export class BlockchainService {
       fromBlock = await this.findBlockByTimestamp(provider, startTs, 0, toBlock);
     }
 
+    if (fromBlock > toBlock) {
+      return { hasMore: false, offset: filters.offset ?? 0, limit: filters.limit ?? 10, transactions: [] };
+    }
+
     const senders = filters.senderAddresses?.length ? filters.senderAddresses : null;
     const receivers = filters.receiverAddresses?.length ? filters.receiverAddresses : null;
     const eventFilter = contract.filters.Transfer(senders, receivers);
@@ -224,16 +228,16 @@ export class BlockchainService {
     const paginated = events.slice(offset, offset + limit);
 
     // Fetch block timestamps only for the events on the current page.
-    const blockCache = new Map<number, ethers.Block | null>();
-    const getBlock = async (blockNumber: number) => {
+    // Store Promises to prevent duplicate RPC calls under concurrent Promise.all execution.
+    const blockCache = new Map<number, Promise<ethers.Block | null>>();
+    const getBlock = (blockNumber: number): Promise<ethers.Block | null> => {
       if (!blockCache.has(blockNumber)) {
-        try {
-          blockCache.set(blockNumber, await provider.getBlock(blockNumber));
-        } catch {
-          blockCache.set(blockNumber, null);
-        }
+        blockCache.set(
+          blockNumber,
+          provider.getBlock(blockNumber).catch(() => null),
+        );
       }
-      return blockCache.get(blockNumber) ?? null;
+      return blockCache.get(blockNumber)!;
     };
 
     const decimals = Number(await contract.decimals());

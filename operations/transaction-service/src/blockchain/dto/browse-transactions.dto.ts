@@ -5,8 +5,21 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import { IsOptional, IsDateString, IsNumber, Min, Max, IsEthereumAddress, Matches, IsArray } from '@nestjs/class-validator';
+import { IsOptional, IsDateString, IsNumber, Min, Max, IsEthereumAddress, Matches, IsArray, ValidateIf, Validate, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from '@nestjs/class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+
+@ValidatorConstraint({ name: 'isBeforeEndTime', async: false })
+class IsBeforeEndTimeConstraint implements ValidatorConstraintInterface {
+  validate(_value: string, args: ValidationArguments) {
+    const obj = args.object as BrowseTransactionsDto;
+    if (!obj.startTime || !obj.endTime) return true;
+    return new Date(obj.startTime).getTime() < new Date(obj.endTime).getTime();
+  }
+
+  defaultMessage() {
+    return 'Start time must be before end time';
+  }
+}
 
 export class BrowseTransactionsDto {
   @ApiPropertyOptional({ description: 'Filter by sender (from) wallet address(es).', type: [String] })
@@ -29,6 +42,7 @@ export class BrowseTransactionsDto {
   @ApiPropertyOptional({ description: 'Return only transactions after this time (ISO-8601, exclusive).' })
   @IsOptional()
   @IsDateString()
+  @Validate(IsBeforeEndTimeConstraint)
   readonly startTime?: string;
 
   @ApiPropertyOptional({ description: 'Return only transactions before this time (ISO-8601, exclusive).' })
