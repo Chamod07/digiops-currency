@@ -16,6 +16,7 @@ import {
   Post,
   Body,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { TransferTokenDto } from './dto/transfer-token.dto';
@@ -36,6 +37,8 @@ import {
 @Controller('blockchain')
 @ApiTags('Transactional')
 export class BlockchainController {
+  private readonly logger = new Logger(BlockchainController.name);
+
   constructor(
     private readonly blockchainService: BlockchainService,
     private readonly httpResponseService: HttpResponseService,
@@ -205,11 +208,17 @@ export class BlockchainController {
       const status = isBadRequest
         ? HttpStatus.BAD_REQUEST
         : HttpStatus.INTERNAL_SERVER_ERROR;
+      const message = isBadRequest
+        ? (error.message || this.httpResponseService.ERROR)
+        : 'An internal error occurred while searching transactions';
+      if (!isBadRequest) {
+        this.logger.error('browseTransactions failed', error?.stack || error);
+      }
       return response
         .status(status)
         .json(
           this.httpResponseService.send(
-            error.message || this.httpResponseService.ERROR,
+            message,
             status,
             null,
           ),
