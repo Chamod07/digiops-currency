@@ -5,23 +5,23 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import { IsOptional, IsString, IsDateString, IsNumber, Min } from '@nestjs/class-validator';
+import { IsOptional, IsString, IsDateString, IsNumber, Min, IsEthereumAddress, Matches } from '@nestjs/class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class BrowseTransactionsDto {
   @ApiPropertyOptional({ description: 'Filter by sender (from) wallet address.' })
   @IsOptional()
-  @IsString()
+  @IsEthereumAddress()
   readonly senderAddress?: string;
 
   @ApiPropertyOptional({ description: 'Filter by receiver (to) wallet address.' })
   @IsOptional()
-  @IsString()
+  @IsEthereumAddress()
   readonly receiverAddress?: string;
 
   @ApiPropertyOptional({ description: 'Filter by exact transaction hash.' })
   @IsOptional()
-  @IsString()
+  @Matches(/^0x[a-fA-F0-9]{64}$/)
   readonly transactionHash?: string;
 
   @ApiPropertyOptional({ description: 'Return only transactions after this time (ISO-8601, exclusive).' })

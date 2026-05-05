@@ -149,7 +149,7 @@ export class BlockchainService {
   };
 
   /**
-   * Binary-searches the chain for the block whose timestamp is closest to targetTimestamp.
+   * Binary-searches the chain for the first block with timestamp >= targetTimestamp.
    * O(log n) RPC calls — ~20 calls for a million-block chain.
    */
   private findBlockByTimestamp = async (
@@ -217,8 +217,10 @@ export class BlockchainService {
     // Newest first.
     events = events.reverse();
 
-    const limit = filters.limit ?? 10;
-    const offset = filters.offset ?? 0;
+    // TODO: Full log scan pagination is not efficient for large event sets;
+    // consider cursor-based pagination or indexed storage for production scale.
+    const limit = Math.min(Math.max(filters.limit ?? 10, 1), 100);
+    const offset = Math.max(filters.offset ?? 0, 0);
     const hasMore = events.length > offset + limit;
     const paginated = events.slice(offset, offset + limit);
 

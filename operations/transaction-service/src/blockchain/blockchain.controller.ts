@@ -15,6 +15,7 @@ import {
   Param,
   Post,
   Body,
+  BadRequestException,
 } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { TransferTokenDto } from './dto/transfer-token.dto';
@@ -177,7 +178,7 @@ export class BlockchainController {
 
   @Post('transactions/search')
   @ApiOperation({ summary: 'Search Transfer events with optional filters and pagination' })
-  @ApiBody({ type: BrowseTransactionsDto, description: 'Optional filters and pagination parameters' })
+  @ApiBody({ type: BrowseTransactionsDto, description: 'Optional filters and pagination parameters', required: false })
   @ApiResponse({
     status: 200,
     description: 'Successfully retrieved transactions.',
@@ -198,12 +199,18 @@ export class BlockchainController {
           ),
         );
     } catch (error) {
+      const isBadRequest =
+        error instanceof BadRequestException ||
+        error?.status === HttpStatus.BAD_REQUEST;
+      const status = isBadRequest
+        ? HttpStatus.BAD_REQUEST
+        : HttpStatus.INTERNAL_SERVER_ERROR;
       return response
-        .status(HttpStatus.BAD_REQUEST)
+        .status(status)
         .json(
           this.httpResponseService.send(
             error.message || this.httpResponseService.ERROR,
-            HttpStatus.BAD_REQUEST,
+            status,
             null,
           ),
         );
