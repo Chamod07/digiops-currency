@@ -189,9 +189,9 @@ export class BlockchainController {
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 500, description: 'Server Error.' })
-  async browseTransactions(@Body() dto: BrowseTransactionsDto, @Res() response) {
+  async browseTransactions(@Body() dto: BrowseTransactionsDto = {} as BrowseTransactionsDto, @Res() response) {
     try {
-      const result = await this.blockchainService.browseTransactions(dto);
+      const result = await this.blockchainService.browseTransactions(dto ?? {});
       return response
         .status(HttpStatus.OK)
         .json(
