@@ -148,6 +148,118 @@ export class BlockchainService {
     };
   };
 
+  /**
+   * Binary-searches the chain for the first block with timestamp >= targetTimestamp.
+   * O(log n) RPC calls — ~20 calls for a million-block chain.
+   */
+  private findBlockByTimestamp = async (
+    provider: ethers.JsonRpcProvider,
+    targetTimestamp: number,
+    low: number,
+    high: number,
+  ): Promise<number> => {
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      const block = await provider.getBlock(mid);
+      if (!block || block.timestamp < targetTimestamp) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    return low;
+  };
+
+  browseTransactions = async (filters: {
+    senderAddresses?: string[];
+    receiverAddresses?: string[];
+    transactionHash?: string;
+    startTime?: string;
+    endTime?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const provider = await this.getWeb3Provider();
+    const contract = new ethers.Contract(
+      blockchainConfigs.contractAddress,
+      blockchainConfigs.contractAbi,
+      provider,
+    );
+
+    const latestBlock = await provider.getBlockNumber();
+
+    // Resolve time filters to block boundaries via binary search (O(log n) RPC calls).
+    // Without time filters this is a single eth_getLogs call across the full chain.
+    let toBlock = latestBlock;
+    let fromBlock = 0;
+
+    if (filters.endTime) {
+      const endTs = Math.floor(new Date(filters.endTime).getTime() / 1000);
+      toBlock = Math.min(latestBlock, await this.findBlockByTimestamp(provider, endTs, 0, latestBlock));
+    }
+    if (filters.startTime) {
+      const startTs = Math.floor(new Date(filters.startTime).getTime() / 1000);
+      fromBlock = await this.findBlockByTimestamp(provider, startTs, 0, toBlock);
+    }
+
+    if (fromBlock > toBlock) {
+      return { hasMore: false, offset: filters.offset ?? 0, limit: filters.limit ?? 10, transactions: [] };
+    }
+
+    const senders = filters.senderAddresses?.length ? filters.senderAddresses : null;
+    const receivers = filters.receiverAddresses?.length ? filters.receiverAddresses : null;
+    const eventFilter = contract.filters.Transfer(senders, receivers);
+
+    // Single eth_getLogs call across the resolved block range.
+    let events = (await contract.queryFilter(eventFilter, fromBlock, toBlock)) as ethers.EventLog[];
+
+    if (filters.transactionHash) {
+      events = events.filter((e) => e.transactionHash === filters.transactionHash);
+    }
+
+    // Newest first.
+    events = events.reverse();
+
+    // TODO: Full log scan pagination is not efficient for large event sets;
+    // consider cursor-based pagination or indexed storage for production scale.
+    const limit = Math.min(Math.max(filters.limit ?? 10, 1), 100);
+    const offset = Math.max(filters.offset ?? 0, 0);
+    const hasMore = events.length > offset + limit;
+    const paginated = events.slice(offset, offset + limit);
+
+    // Fetch block timestamps only for the events on the current page.
+    // Store Promises to prevent duplicate RPC calls under concurrent Promise.all execution.
+    const blockCache = new Map<number, Promise<ethers.Block | null>>();
+    const getBlock = (blockNumber: number): Promise<ethers.Block | null> => {
+      if (!blockCache.has(blockNumber)) {
+        blockCache.set(
+          blockNumber,
+          provider.getBlock(blockNumber).catch(() => null),
+        );
+      }
+      return blockCache.get(blockNumber)!;
+    };
+
+    const decimals = Number(await contract.decimals());
+
+    const transactions = await Promise.all(
+      paginated.map(async (log) => {
+        const block = await getBlock(log.blockNumber);
+        return {
+          txHash: log.transactionHash,
+          blockNumber: log.blockNumber,
+          senderAddress: log.args[0] as string,
+          receiverAddress: log.args[1] as string,
+          amount: ethers.formatUnits(log.args[2], decimals),
+          amountRaw: (log.args[2] as bigint).toString(),
+          timestamp: block ? new Date(block.timestamp * 1000).toISOString() : null,
+        };
+      }),
+    );
+
+    return { hasMore, offset, limit, transactions };
+  };
+
   transferTokens = async (clientId: string, recipientWalletAddress: string, amount: number) => {
     const walletConfig = this.walletConfigService.getWalletConfig(clientId);
     if (!walletConfig) {
