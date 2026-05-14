@@ -21,3 +21,19 @@ public isolated function jwtDecoder(string jwt) returns JwtPayload|error {
 # + return - If empty return TRUE, else return FALSE
 public isolated function isEmptyVal(string? val) returns boolean =>
     val is () || val.trim().length() == 0;
+
+# Returns the identifier used to store/query a user's wallet.
+# WSO2 users are identified by their email; all others by their UUID to avoid storing PII.
+#
+# + email - User email from JWT
+# + uuid - User UUID (sub claim) from JWT
+# + return - Identifier string or error if UUID is missing for a non-WSO2 user
+public isolated function getUserIdentifier(string email, string? uuid) returns string|error {
+    if email.endsWith(WSO2_EMAIL_SUFFIX) {
+        return email;
+    }
+    if isEmptyVal(uuid) {
+        return error("UUID not available for non-WSO2 user");
+    }
+    return <string>uuid;
+}

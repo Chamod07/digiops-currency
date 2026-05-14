@@ -11,4 +11,6 @@ public type JwtPayload record {
     string? email = ();
     # Subject
     string? sub = ();
+    # Asgardeo user ID
+    string? userid = ();
 };
