@@ -62,7 +62,7 @@ service http:InterceptableService / on new http:Listener(9091) {
                 walletAddress
             };
             boolean isFirstWallet = check database:isUserFirstWallet(userWallet.userEmail);
-            if isFirstWallet {
+            if isFirstWallet && email.endsWith(WSO2_EMAIL_SUFFIX) {
                 userWallet.initialCoinsAllocated = transactions:initialCoins;
                 check database:insertUserWallet(userWallet);
                 boolean coinsAllocated = check transactions:allocateInitialCoins(walletAddress);
