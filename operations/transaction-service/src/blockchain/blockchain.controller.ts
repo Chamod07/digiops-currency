@@ -15,6 +15,8 @@ import {
   Param,
   Post,
   Body,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { TransferTokenDto } from './dto/transfer-token.dto';
@@ -22,6 +24,8 @@ import { MasterWalletBalanceResponseDto } from './dto/master-wallet-balance-resp
 import { WalletBalanceByAddressResponseDto } from './dto/wallet-balance-response.dto';
 import { TokenTransferResponseDto } from './dto/token-transfer-response.dto';
 import { TransactionDetailsResponseDto } from './dto/transaction-details-response.dto';
+import { BrowseTransactionsDto } from './dto/browse-transactions.dto';
+import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
 import { 
   ApiBody,
   ApiOperation,
@@ -33,6 +37,8 @@ import {
 @Controller('blockchain')
 @ApiTags('Transactional')
 export class BlockchainController {
+  private readonly logger = new Logger(BlockchainController.name);
+
   constructor(
     private readonly blockchainService: BlockchainService,
     private readonly httpResponseService: HttpResponseService,
@@ -167,6 +173,53 @@ export class BlockchainController {
           this.httpResponseService.send(
             error.message || this.httpResponseService.ERROR,
             HttpStatus.BAD_REQUEST,
+            null,
+          ),
+        );
+    }
+  }
+
+  @Post('transactions/search')
+  @ApiOperation({ summary: 'Search Transfer events with optional filters and pagination' })
+  @ApiBody({ type: BrowseTransactionsDto, description: 'Optional filters and pagination parameters', required: false })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved transactions.',
+    type: TransactionListResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 500, description: 'Server Error.' })
+  async browseTransactions(@Body() dto: BrowseTransactionsDto = {} as BrowseTransactionsDto, @Res() response) {
+    try {
+      const result = await this.blockchainService.browseTransactions(dto ?? {});
+      return response
+        .status(HttpStatus.OK)
+        .json(
+          this.httpResponseService.send(
+            this.httpResponseService.SUCCESS,
+            HttpStatus.OK,
+            result,
+          ),
+        );
+    } catch (error) {
+      const isBadRequest =
+        error instanceof BadRequestException ||
+        error?.status === HttpStatus.BAD_REQUEST;
+      const status = isBadRequest
+        ? HttpStatus.BAD_REQUEST
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+      const message = isBadRequest
+        ? (error.message || this.httpResponseService.ERROR)
+        : 'An internal error occurred while searching transactions';
+      if (!isBadRequest) {
+        this.logger.error('browseTransactions failed', error?.stack || error);
+      }
+      return response
+        .status(status)
+        .json(
+          this.httpResponseService.send(
+            message,
+            status,
             null,
           ),
         );
