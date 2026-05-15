@@ -32,8 +32,8 @@ public isolated function getUserIdentifier(string email, string? uuid) returns s
     if email.endsWith(WSO2_EMAIL_SUFFIX) {
         return email;
     }
-    if isEmptyVal(uuid) {
+    if isEmptyVal(uuid) || uuid is () {
         return error("UUID not available for non-WSO2 user");
     }
-    return <string>uuid;
+    return uuid;
 }
