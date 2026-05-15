@@ -33,14 +33,12 @@ service class JwtInterceptor {
             return http:FORBIDDEN;
         }
         JwtPayload {email, userid} = jwtInfo;
-        if isEmptyVal(email) {
-            log:printWarn("Email is empty in the JWT");
+        if isEmptyVal(email) || isEmptyVal(userid) {
+            log:printWarn("Email or userid is empty in the JWT");
             return http:FORBIDDEN;
         }
         ctx.set(EMAIL, email);
-        if !isEmptyVal(userid) {
-            ctx.set(UUID, userid);
-        }
+        ctx.set(UUID, userid);
         return ctx.next();
     }
 }
