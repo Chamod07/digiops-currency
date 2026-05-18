@@ -29,9 +29,19 @@ service http:InterceptableService / on new http:Listener(9091) {
 
         string walletAddress = payload.walletAddress;
 
-        string|error userEmail = ctx.getWithType(EMAIL);
-        if userEmail is error {
-            log:printError("Failed to get user email from context", userEmail);
+        string|error email = ctx.getWithType(EMAIL);
+        if email is error {
+            log:printError("Failed to get user email from context", email);
+            return <http:InternalServerError>{body: {"message": ERR_MSG_CREATE_WALLET}};
+        }
+        string? uuid = ();
+        string|error uuidResult = ctx.getWithType(UUID);
+        if uuidResult is string {
+            uuid = uuidResult;
+        }
+        string|error userIdentifier = getUserIdentifier(email, uuid);
+        if userIdentifier is error {
+            log:printError("Failed to resolve user identifier", userIdentifier);
             return <http:InternalServerError>{body: {"message": ERR_MSG_CREATE_WALLET}};
         }
 
@@ -48,11 +58,11 @@ service http:InterceptableService / on new http:Listener(9091) {
 
         transaction {
             types:UserWallet userWallet = {
-                userEmail,
+                userEmail: userIdentifier,
                 walletAddress
             };
             boolean isFirstWallet = check database:isUserFirstWallet(userWallet.userEmail);
-            if isFirstWallet {
+            if isFirstWallet && email.endsWith(WSO2_EMAIL_SUFFIX) {
                 userWallet.initialCoinsAllocated = transactions:initialCoins;
                 check database:insertUserWallet(userWallet);
                 boolean coinsAllocated = check transactions:allocateInitialCoins(walletAddress);
@@ -85,11 +95,21 @@ service http:InterceptableService / on new http:Listener(9091) {
             log:printError("Failed to get user email from context", email);
             return <http:InternalServerError>{body: {"message": ERR_MSG_FETCH_WALLETS}};
         }
-        
-        types:WalletAddressInfo[]|error walletList = database:getWalletAddressesByEmail(email);
-        
+        string? uuid = ();
+        string|error uuidResult = ctx.getWithType(UUID);
+        if uuidResult is string {
+            uuid = uuidResult;
+        }
+        string|error identifier = getUserIdentifier(email, uuid);
+        if identifier is error {
+            log:printError("Failed to resolve user identifier", identifier);
+            return <http:InternalServerError>{body: {"message": ERR_MSG_FETCH_WALLETS}};
+        }
+
+        types:WalletAddressInfo[]|error walletList = database:getWalletAddressesByEmail(identifier);
+
         if walletList is error {
-            log:printError(string `Failed to fetch wallet addresses for user ${email}`, walletList);
+            log:printError(string `Failed to fetch wallet addresses for user ${identifier}`, walletList);
             return <http:InternalServerError>{body: {"message": ERR_MSG_FETCH_WALLETS}};
         }
 
@@ -131,7 +151,17 @@ service http:InterceptableService / on new http:Listener(9091) {
             log:printError("Failed to get user email from context", email);
             return <http:InternalServerError>{body: {"message": ERR_MSG_SET_PRIMARY}};
         }
-        
+        string? uuid = ();
+        string|error uuidResult = ctx.getWithType(UUID);
+        if uuidResult is string {
+            uuid = uuidResult;
+        }
+        string|error identifier = getUserIdentifier(email, uuid);
+        if identifier is error {
+            log:printError("Failed to resolve user identifier", identifier);
+            return <http:InternalServerError>{body: {"message": ERR_MSG_SET_PRIMARY}};
+        }
+
         types:UserWallet|error? walletDetails = database:getUserWallet(address);
         if walletDetails is error {
             log:printError(string `Error getting wallet details for ${address}`, walletDetails);
@@ -139,14 +169,14 @@ service http:InterceptableService / on new http:Listener(9091) {
         } else if walletDetails is () {
             log:printWarn(string `Wallet ${address} not found`);
             return http:NOT_FOUND;
-        } else if walletDetails.userEmail != email {
-            log:printWarn(string `Wallet ${address} does not belong to user ${email}.`);
+        } else if walletDetails.userEmail != identifier {
+            log:printWarn(string `Wallet ${address} does not belong to user ${identifier}.`);
             return http:FORBIDDEN;
         }
-        
-        error? result = database:setWalletAsPrimary(email, address);
+
+        error? result = database:setWalletAsPrimary(identifier, address);
         if result is error {
-            log:printError(string `Failed to set wallet ${address} as primary for user ${email}`, result);
+            log:printError(string `Failed to set wallet ${address} as primary for user ${identifier}`, result);
             return <http:InternalServerError>{body: {"message": ERR_MSG_SET_PRIMARY}};
         }
         return http:OK;
