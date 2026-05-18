@@ -10,43 +10,27 @@ import { ethers } from 'ethers';
 import { blockchainConfigs } from '../config/blockchain.config';
 import { WalletConfigService } from '../common/wallet-config.service';
 
-const TX_RECEIPT_TIMEOUT_MS = 120_000;
-const TX_RECEIPT_POLL_INTERVAL_MS = 1000;
-
 @Injectable()
 export class BlockchainService {
   private readonly logger = new Logger(BlockchainService.name);
-  private provider: ethers.JsonRpcProvider | null = null;
 
   constructor(private walletConfigService: WalletConfigService) {}
 
-  getWeb3Provider = (): ethers.JsonRpcProvider => {
-    if (!this.provider) {
-      const fetchRequest = new ethers.FetchRequest(blockchainConfigs.rpcUrl);
-      fetchRequest.setHeader('User-Agent', 'PostmanRuntime/7.26.8');
+  getWeb3Provider = async () => {
+    /** Depending on choreo configurations you may need to use authentication header
+     * to communicate with blockchain network.
+     * 'User-Agent': 'PostmanRuntime/7.26.8' added due to choreo has protection mechanism for unknown user agents.
+     **/
+    const connection = {
+      url: blockchainConfigs.rpcUrl,
+      headers: {
+        'User-Agent': 'PostmanRuntime/7.26.8',
+        Authorization: 'Bearer ' + '',
+      },
+    };
+    const provider = new ethers.JsonRpcProvider(connection.url, blockchainConfigs.chainID);
 
-      this.provider = new ethers.JsonRpcProvider(
-        fetchRequest,
-        blockchainConfigs.chainID,
-        { pollingInterval: 1000, staticNetwork: true },
-      );
-    }
-    return this.provider;
-  };
-
-  private waitForReceipt = async (
-    provider: ethers.JsonRpcProvider,
-    txHash: string,
-    timeoutMs = TX_RECEIPT_TIMEOUT_MS,
-    intervalMs = TX_RECEIPT_POLL_INTERVAL_MS,
-  ): Promise<ethers.TransactionReceipt | null> => {
-    const deadline = Date.now() + timeoutMs;
-    while (Date.now() < deadline) {
-      const receipt = await provider.getTransactionReceipt(txHash);
-      if (receipt) return receipt;
-      await new Promise((r) => setTimeout(r, intervalMs));
-    }
-    return null;
+    return provider;
   };
 
   getMasterWalletTokenBalance = async (clientId: string) => {
@@ -54,18 +38,15 @@ export class BlockchainService {
     if (!walletConfig) {
       throw new Error(`Wallet config not found for clientId: ${clientId}`);
     }
-    const provider = this.getWeb3Provider();
-    const contractAddress =
-      walletConfig.CONTRACT_ADDRESS || blockchainConfigs.contractAddress;
+    const provider = await this.getWeb3Provider();
+    const contractAddress = walletConfig.CONTRACT_ADDRESS || blockchainConfigs.contractAddress;
     const contract = new ethers.Contract(
       contractAddress,
       blockchainConfigs.contractAbi,
       provider,
     );
     const decimals = Number(await contract.decimals());
-    const balance = await contract.balanceOf(
-      walletConfig.PUBLIC_WALLET_ADDRESS,
-    );
+    const balance = await contract.balanceOf(walletConfig.PUBLIC_WALLET_ADDRESS);
     const formattedValue = ethers.formatUnits(balance, decimals);
     return {
       masterWalletAddress: walletConfig.PUBLIC_WALLET_ADDRESS,
@@ -76,7 +57,7 @@ export class BlockchainService {
   };
 
   getWalletTokenBalance = async (walletAddress: string) => {
-    const provider = this.getWeb3Provider();
+    const provider = await this.getWeb3Provider();
     const contract = new ethers.Contract(
       blockchainConfigs.contractAddress,
       blockchainConfigs.contractAbi,
@@ -94,7 +75,7 @@ export class BlockchainService {
   };
 
   getTransactionDetailsByTxHash = async (txHash: string) => {
-    const provider = this.getWeb3Provider();
+    const provider = await this.getWeb3Provider();
     const txDetails = await provider.getTransaction(txHash);
 
     if (!txDetails) {
@@ -110,9 +91,7 @@ export class BlockchainService {
       };
     }
 
-    const contractInterface = new ethers.Interface(
-      blockchainConfigs.contractAbi,
-    );
+    const contractInterface = new ethers.Interface(blockchainConfigs.contractAbi);
     const decodedData = contractInterface.parseTransaction({
       data: txDetails.data,
     });
@@ -200,7 +179,7 @@ export class BlockchainService {
     limit?: number;
     offset?: number;
   }) => {
-    const provider = this.getWeb3Provider();
+    const provider = await this.getWeb3Provider();
     const contract = new ethers.Contract(
       blockchainConfigs.contractAddress,
       blockchainConfigs.contractAbi,
@@ -216,49 +195,26 @@ export class BlockchainService {
 
     if (filters.endTime) {
       const endTs = Math.floor(new Date(filters.endTime).getTime() / 1000);
-      toBlock = Math.min(
-        latestBlock,
-        await this.findBlockByTimestamp(provider, endTs, 0, latestBlock),
-      );
+      toBlock = Math.min(latestBlock, await this.findBlockByTimestamp(provider, endTs, 0, latestBlock));
     }
     if (filters.startTime) {
       const startTs = Math.floor(new Date(filters.startTime).getTime() / 1000);
-      fromBlock = await this.findBlockByTimestamp(
-        provider,
-        startTs,
-        0,
-        toBlock,
-      );
+      fromBlock = await this.findBlockByTimestamp(provider, startTs, 0, toBlock);
     }
 
     if (fromBlock > toBlock) {
-      return {
-        hasMore: false,
-        offset: filters.offset ?? 0,
-        limit: filters.limit ?? 10,
-        transactions: [],
-      };
+      return { hasMore: false, offset: filters.offset ?? 0, limit: filters.limit ?? 10, transactions: [] };
     }
 
-    const senders = filters.senderAddresses?.length
-      ? filters.senderAddresses
-      : null;
-    const receivers = filters.receiverAddresses?.length
-      ? filters.receiverAddresses
-      : null;
+    const senders = filters.senderAddresses?.length ? filters.senderAddresses : null;
+    const receivers = filters.receiverAddresses?.length ? filters.receiverAddresses : null;
     const eventFilter = contract.filters.Transfer(senders, receivers);
 
     // Single eth_getLogs call across the resolved block range.
-    let events = (await contract.queryFilter(
-      eventFilter,
-      fromBlock,
-      toBlock,
-    )) as ethers.EventLog[];
+    let events = (await contract.queryFilter(eventFilter, fromBlock, toBlock)) as ethers.EventLog[];
 
     if (filters.transactionHash) {
-      events = events.filter(
-        (e) => e.transactionHash === filters.transactionHash,
-      );
+      events = events.filter((e) => e.transactionHash === filters.transactionHash);
     }
 
     // Newest first.
@@ -296,9 +252,7 @@ export class BlockchainService {
           receiverAddress: log.args[1] as string,
           amount: ethers.formatUnits(log.args[2], decimals),
           amountRaw: (log.args[2] as bigint).toString(),
-          timestamp: block
-            ? new Date(block.timestamp * 1000).toISOString()
-            : null,
+          timestamp: block ? new Date(block.timestamp * 1000).toISOString() : null,
         };
       }),
     );
@@ -306,16 +260,12 @@ export class BlockchainService {
     return { hasMore, offset, limit, transactions };
   };
 
-  transferTokens = async (
-    clientId: string,
-    recipientWalletAddress: string,
-    amount: number,
-  ) => {
+  transferTokens = async (clientId: string, recipientWalletAddress: string, amount: number) => {
     const walletConfig = this.walletConfigService.getWalletConfig(clientId);
     if (!walletConfig) {
       throw new Error(`Wallet config not found for clientId: ${clientId}`);
     }
-    const provider = this.getWeb3Provider();
+    const provider = await this.getWeb3Provider();
     const envVar = `WALLET_PRIVATE_KEY_${clientId}`;
     const privateKey = process.env[envVar];
     if (!privateKey) {
@@ -323,8 +273,7 @@ export class BlockchainService {
     }
     const wallet = new ethers.Wallet(privateKey);
     const signer = wallet.connect(provider);
-    const contractAddress =
-      walletConfig.CONTRACT_ADDRESS || blockchainConfigs.contractAddress;
+    const contractAddress = walletConfig.CONTRACT_ADDRESS || blockchainConfigs.contractAddress;
     const contract = new ethers.Contract(
       contractAddress,
       blockchainConfigs.contractAbi,
@@ -341,15 +290,7 @@ export class BlockchainService {
       options,
     );
     this.logger.log(`Transaction hash: ${tx.hash}`);
-    const receipt = await this.waitForReceipt(provider, tx.hash);
-    if (!receipt) {
-      this.logger.warn(
-        `Transaction ${tx.hash} not confirmed within ${
-          TX_RECEIPT_TIMEOUT_MS / 1000
-        }s timeout`,
-      );
-      return { txHash: tx.hash, status: 0, committedBlockNumber: null };
-    }
+    const receipt = await tx.wait();
     this.logger.log(`Transaction was mined in block: ${receipt.blockNumber}`);
     return {
       txHash: tx.hash,
