@@ -33,7 +33,7 @@ service class JwtInterceptor {
         }
         JwtPayload {email, sub} = jwtInfo;
         if isEmptyVal(email) && isEmptyVal(sub) {
-            log:printWarn("Email is empty in the JWT");
+            log:printWarn("Both email and sub are empty in the JWT");
             return http:FORBIDDEN;
         }
         ctx.set(EMAIL, sub is string ? sub : email);
