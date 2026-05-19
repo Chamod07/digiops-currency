@@ -9,7 +9,6 @@ import ballerina/log;
 
 const X_JWT_ASSERTION = "x-jwt-assertion";
 const EMAIL = "email";
-const UUID = "uuid";
 
 # Request Interceptor used to decode the JWT.
 service class JwtInterceptor {
@@ -32,13 +31,12 @@ service class JwtInterceptor {
             log:printError("Error while decoding JWT", jwtInfo);
             return http:FORBIDDEN;
         }
-        JwtPayload {email, userid} = jwtInfo;
-        if isEmptyVal(email) || isEmptyVal(userid) {
-            log:printWarn("Email or userid is empty in the JWT");
+        JwtPayload {email, sub} = jwtInfo;
+        if isEmptyVal(email) && isEmptyVal(sub) {
+            log:printWarn("Both email and sub are empty in the JWT");
             return http:FORBIDDEN;
         }
-        ctx.set(EMAIL, email);
-        ctx.set(UUID, userid);
+        ctx.set(EMAIL, sub is string ? sub : email);
         return ctx.next();
     }
 }
