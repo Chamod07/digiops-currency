@@ -5,21 +5,25 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import { useEffect, useState, memo, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Spin, Pagination } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
+import { useEffect, useState, memo, forwardRef, useImperativeHandle } from 'react';
+import { Spin } from 'antd';
+import { LoadingOutlined, RightOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 import { STORAGE_KEYS } from '../../constants/configs';
 import {
-  ERROR_READING_WALLET_DETAILS,
   RECENT_ACTIVITIES,
+  VIEW_ALL,
 } from '../../constants/strings';
 import { getLocalDataAsync } from '../../helpers/storage';
 import { useTransactionHistory } from '../../hooks/useTransactionHistory';
 import TransactionItem from '../shared/TransactionItem';
 import { COLORS } from '../../constants/colors';
 
+const RECENT_PREVIEW_SIZE = 5;
+
 const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) => {
+  const navigate = useNavigate();
   const [walletAddress, setWalletAddress] = useState(propWalletAddress || "");
 
   useEffect(() => {
@@ -38,24 +42,16 @@ const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) 
     }
   }, [propWalletAddress]);
 
-  const [page, setPage] = useState(1);
   const {
     transactions,
     loading,
     refresh,
     totalCount,
-    totalPages,
-    page: currentPage,
-    pageSize
   } = useTransactionHistory({
     walletAddress,
-    pageSize: 5,
-    page
+    pageSize: RECENT_PREVIEW_SIZE,
+    page: 1
   });
-
-  useEffect(() => {
-    setPage(1);
-  }, [walletAddress]);
 
   useImperativeHandle(ref, () => ({
     refreshTransactions: () => {
@@ -75,10 +71,10 @@ const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) 
       return (
         <>
           {transactions.map((transaction, index) => (
-            <TransactionItem 
-              key={`${transaction.txHash}-${index}`} 
-              transaction={transaction} 
-              index={index} 
+            <TransactionItem
+              key={`${transaction.txHash}-${index}`}
+              transaction={transaction}
+              index={index}
             />
           ))}
         </>
@@ -96,10 +92,33 @@ const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) 
     <div className="recent-activities-widget">
       <div className="recent-activities-widget-inner">
         <div className="mt-1">
-          <div className="d-flex justify-content-between">
+          <div className="d-flex justify-content-between align-items-center">
             <div className="sub-heading">
               <h4>{RECENT_ACTIVITIES}</h4>
             </div>
+            {totalCount > RECENT_PREVIEW_SIZE && (
+              <span
+                className="recent-activities-view-all"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate('/history')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    navigate('/history');
+                  }
+                }}
+                style={{
+                  color: COLORS.ORANGE_PRIMARY,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                {VIEW_ALL}
+                <RightOutlined style={{ fontSize: 12 }} />
+              </span>
+            )}
           </div>
         </div>
 
@@ -111,21 +130,9 @@ const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) 
             />
           </div>
         ) : (
-          <>
-            <div className="recent-activity-container">
-              <TransactionList transactions={transactions} />
-            </div>
-            <div className="d-flex justify-content-center mt-4">
-              <Pagination
-                current={page}
-                pageSize={5}
-                total={totalCount}
-                onChange={setPage}
-                showSizeChanger={false}
-                hideOnSinglePage
-              />
-            </div>
-          </>
+          <div className="recent-activity-container">
+            <TransactionList transactions={transactions} />
+          </div>
         )}
       </div>
     </div>
