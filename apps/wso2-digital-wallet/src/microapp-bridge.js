@@ -16,16 +16,36 @@ const TOPIC = {
   TOTP: "totp"
 };
 
-// Get Token
+// Single-flight: `resolveToken` is one host-overwritten slot, so concurrent
+// callers would clobber each other. Queue waiters, one native request per batch.
+let tokenWaiters = [];
+let tokenRequestInFlight = false;
+
 export const getToken = (callback) => {
-  if (window.nativebridge) {
-    window.nativebridge.requestToken();
-    window.nativebridge.resolveToken = (token) => {
-      callback(token);
-    };
-  } else {
+  if (!window.nativebridge) {
     console.error("Native bridge is not available");
     callback();
+    return;
+  }
+
+  tokenWaiters.push(callback);
+
+  window.nativebridge.resolveToken = (token) => {
+    const waiters = tokenWaiters;
+    tokenWaiters = [];
+    tokenRequestInFlight = false;
+    waiters.forEach((cb) => {
+      try {
+        cb(token);
+      } catch (e) {
+        console.error("Token waiter callback failed", e);
+      }
+    });
+  };
+
+  if (!tokenRequestInFlight) {
+    tokenRequestInFlight = true;
+    window.nativebridge.requestToken();
   }
 };
 

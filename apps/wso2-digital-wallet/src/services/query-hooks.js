@@ -12,7 +12,7 @@ export function useWalletBalance(walletAddress, options = {}) {
   const isValidAddress = typeof walletAddress === 'string' && walletAddress.startsWith('0x') && walletAddress.length === 42;
   return useQuery({
     queryKey: ['walletBalance', walletAddress],
-    queryFn: () => getWalletBalanceByWalletAddress(walletAddress, { timeout: 5000 }),
+    queryFn: () => getWalletBalanceByWalletAddress(walletAddress),
     enabled: isValidAddress,
     staleTime: 30_000, // Data is considered fresh for 30 seconds; avoids refetching if still fresh
     retry: 2,
