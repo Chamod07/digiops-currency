@@ -6,7 +6,7 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getTransactionHistory } from '../services/blockchain.service';
+import { getTransactionHistory, MAX_TRANSFER_PAGE } from '../services/blockchain.service';
 
 export function useTransactionHistory({ walletAddress, pageSize = 20, filter = 'all', page = 1 }) {
   const queryClient = useQueryClient();
@@ -22,7 +22,7 @@ export function useTransactionHistory({ walletAddress, pageSize = 20, filter = '
       if (!walletAddress || walletAddress === '0x' || walletAddress.length !== 42) {
         return { transactions: [], totalCount: 0 };
       }
-      const result = await getTransactionHistory(walletAddress, 0, 'latest', 1000, 0); // fetch all (up to 1000)
+      const result = await getTransactionHistory(walletAddress, 0, 'latest', MAX_TRANSFER_PAGE, 0); // fetch most recent page; client-side filter/paginate below
       return { ...result, totalCount: result.transactions.length };
     },
     enabled: !!walletAddress && walletAddress !== '0x' && walletAddress.length === 42,

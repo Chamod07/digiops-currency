@@ -7,10 +7,29 @@
 
 import { getToken } from "../microapp-bridge";
 
+const TOKEN_TIMEOUT_MS = 8000;
+
 export function getTokenAsync() {
   return new Promise((resolve, reject) => {
-    const callback = (data) => resolve(data);
-    const failedToRespondCallback = (err) => reject(err);
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Token request timed out"));
+    }, TOKEN_TIMEOUT_MS);
+
+    const callback = (data) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(data);
+    };
+    const failedToRespondCallback = (err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      reject(err);
+    };
 
     getToken(callback, failedToRespondCallback);
   });

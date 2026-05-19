@@ -17,17 +17,81 @@ import {
 import { getTokenAsync } from '../helpers/auth';
 import { getLocalDataAsync } from '../helpers/storage';
 
-export const getRPCProvider = async () => {
-  const accessToken = await getTokenAsync();
-  const headers = {
-    Authorization: `Bearer ${accessToken}`
-  };
+// Caps the per-log getBlock RPC fan-out for the history view.
+export const MAX_TRANSFER_PAGE = 200;
 
-  const provider = new ethers.providers.StaticJsonRpcProvider(
-    { url: RPC_ENDPOINT, headers: headers },
-    CHAIN_ID
+// The JWT/Choreo gateway drops requests under large concurrent bursts.
+const RPC_CONCURRENCY = 8;
+
+let tokenDecimalsValue = null;
+let tokenDecimalsInFlight = null;
+const getTokenDecimals = async (contract) => {
+  if (tokenDecimalsValue !== null) {
+    return tokenDecimalsValue;
+  }
+  if (!tokenDecimalsInFlight) {
+    tokenDecimalsInFlight = contract
+      .decimals()
+      .then((decimals) => {
+        tokenDecimalsValue = decimals;
+        return decimals;
+      })
+      .finally(() => {
+        tokenDecimalsInFlight = null;
+      });
+  }
+  return tokenDecimalsInFlight;
+};
+
+const mapWithConcurrency = async (items, mapper, concurrency) => {
+  const results = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await mapper(items[index], index);
+    }
+  };
+  const pool = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    worker
   );
-  return provider;
+  await Promise.all(pool);
+  return results;
+};
+
+// Reuse one provider/token across a burst so concurrent queries don't each
+// trigger a native token fetch. Short TTL keeps the baked-in JWT fresh.
+const PROVIDER_TTL_MS = 30_000;
+let cachedProvider = null;
+let cachedProviderAt = 0;
+let providerInFlight = null;
+
+export const getRPCProvider = async () => {
+  if (cachedProvider && Date.now() - cachedProviderAt < PROVIDER_TTL_MS) {
+    return cachedProvider;
+  }
+  if (providerInFlight) {
+    return providerInFlight;
+  }
+  providerInFlight = (async () => {
+    try {
+      const accessToken = await getTokenAsync();
+      const headers = {
+        Authorization: `Bearer ${accessToken}`
+      };
+      const provider = new ethers.providers.StaticJsonRpcProvider(
+        { url: RPC_ENDPOINT, headers: headers },
+        CHAIN_ID
+      );
+      cachedProvider = provider;
+      cachedProviderAt = Date.now();
+      return provider;
+    } finally {
+      providerInFlight = null;
+    }
+  })();
+  return providerInFlight;
 };
 
 export const getCurrentBlockNumber = async (retryCount = 0) => {
@@ -52,33 +116,25 @@ export const getCurrentBlockNumber = async (retryCount = 0) => {
   }
 };
 
-export const getWalletBalanceByWalletAddress = async (walletAddress, { timeout = 10000 } = {}) => {
-// Cache decimals in memory for the session
-let cachedDecimals = null;
-const fetchBalance = async () => {
-  try {
-    const provider = await getRPCProvider();
-    // Create ERC20 contract instance
-    const contract = new ethers.Contract(
-      CONTRACT_ADDRESS,
-      JSON.parse(CONTRACT_ABI),
-      provider
-    );
-    const balance = await contract.balanceOf(walletAddress);
-    let decimals;
-    if (cachedDecimals === null) {
-      decimals = await contract.decimals();
-      cachedDecimals = decimals;
-    } else {
-      decimals = cachedDecimals;
+export const getWalletBalanceByWalletAddress = async (walletAddress, { timeout = 15000 } = {}) => {
+  const fetchBalance = async () => {
+    try {
+      const provider = await getRPCProvider();
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        JSON.parse(CONTRACT_ABI),
+        provider
+      );
+      const [balance, decimals] = await Promise.all([
+        contract.balanceOf(walletAddress),
+        getTokenDecimals(contract),
+      ]);
+      return ethers.utils.formatUnits(balance, decimals);
+    } catch (error) {
+      console.error('Balance fetch error:', error);
+      throw error;
     }
-    const formattedBalance = ethers.utils.formatUnits(balance, decimals);
-    return formattedBalance;
-  } catch (error) {
-    console.error('Balance fetch error:', error);
-    throw error;
-  }
-};
+  };
   return Promise.race([
     fetchBalance(),
     new Promise((_, reject) => setTimeout(() => reject(new Error('Balance fetch timeout')), timeout))
@@ -170,35 +226,54 @@ export const getTokenTransfersByAddress = async (
   const allLogs = [...sentLogs, ...receivedLogs]
     .sort((a, b) => b.blockNumber - a.blockNumber);
 
-  const paginatedLogs = allLogs.slice(offset, offset + limit);
-  
+  const safeLimit = Math.min(Math.max(limit, 1), MAX_TRANSFER_PAGE);
+  const safeOffset = Math.max(offset, 0);
+  const paginatedLogs = allLogs.slice(safeOffset, safeOffset + safeLimit);
+
+  const decimals = await getTokenDecimals(contract);
+
+  const sentTxHashes = new Set(sentLogs.map((log) => log.transactionHash));
+
+  // Cache the Promise so txs in the same block share one getBlock call.
+  const blockCache = new Map();
+  const getBlock = (blockNumber) => {
+    if (!blockCache.has(blockNumber)) {
+      blockCache.set(
+        blockNumber,
+        provider.getBlock(blockNumber).catch(() => null)
+      );
+    }
+    return blockCache.get(blockNumber);
+  };
+
   const formatLog = async (log) => {
-    const block = await provider.getBlock(log.blockNumber);
-    const isSent = sentLogs.some(sentLog => sentLog.transactionHash === log.transactionHash);
-    
+    const block = await getBlock(log.blockNumber);
     return {
       txHash: log.transactionHash,
       blockNumber: log.blockNumber,
       from: log.args.from,
       to: log.args.to,
-      value: ethers.utils.formatUnits(
-        log.args.value,
-        await contract.decimals(),
-      ),
-      timestamp: formatTimestamp(new Date(block.timestamp * 1000).toISOString()),
-      direction: isSent ? 'send' : 'receive'
+      value: ethers.utils.formatUnits(log.args.value, decimals),
+      timestamp: block
+        ? formatTimestamp(new Date(block.timestamp * 1000).toISOString())
+        : 'Unknown time',
+      direction: sentTxHashes.has(log.transactionHash) ? 'send' : 'receive'
     };
   };
 
-  const transactions = await Promise.all(paginatedLogs.map(formatLog));
+  const transactions = await mapWithConcurrency(
+    paginatedLogs,
+    formatLog,
+    RPC_CONCURRENCY
+  );
 
   return {
     address: walletAddress,
     transactions,
     totalCount: allLogs.length,
-    hasMore: offset + limit < allLogs.length,
-    currentPage: Math.floor(offset / limit) + 1,
-    totalPages: Math.ceil(allLogs.length / limit)
+    hasMore: safeOffset + safeLimit < allLogs.length,
+    currentPage: Math.floor(safeOffset / safeLimit) + 1,
+    totalPages: Math.ceil(allLogs.length / safeLimit)
   };
 };
 
