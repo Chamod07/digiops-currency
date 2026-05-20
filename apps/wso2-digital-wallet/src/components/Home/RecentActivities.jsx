@@ -5,7 +5,15 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import { useEffect, useState, memo, forwardRef, useImperativeHandle } from 'react';
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  memo,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import { Spin } from 'antd';
 import { LoadingOutlined, RightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -21,123 +29,210 @@ import TransactionItem from '../shared/TransactionItem';
 import { COLORS } from '../../constants/colors';
 
 const RECENT_PREVIEW_SIZE = 5;
+const PULL_THRESHOLD_PX = 70;
+const PULL_MAX_PX = 110;
+const PULL_DAMPENING = 0.5;
 
-const RecentActivities = forwardRef(({ walletAddress: propWalletAddress }, ref) => {
-  const navigate = useNavigate();
-  const [walletAddress, setWalletAddress] = useState(propWalletAddress || "");
+const RecentActivities = forwardRef(
+  ({ walletAddress: propWalletAddress, onPullRefresh }, ref) => {
+    const navigate = useNavigate();
+    const [walletAddress, setWalletAddress] = useState(propWalletAddress || '');
 
-  useEffect(() => {
-    if (propWalletAddress) {
-      setWalletAddress(propWalletAddress);
-    } else {
-      const fetchWalletAddress = async () => {
-        try {
-          const address = await getLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS);
-          setWalletAddress(address || "");
-        } catch (error) {
-          console.error('RecentActivities: Error fetching wallet address:', error);
-        }
-      };
-      fetchWalletAddress();
-    }
-  }, [propWalletAddress]);
+    useEffect(() => {
+      if (propWalletAddress) {
+        setWalletAddress(propWalletAddress);
+      } else {
+        const fetchWalletAddress = async () => {
+          try {
+            const address = await getLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS);
+            setWalletAddress(address || '');
+          } catch (error) {
+            console.error('RecentActivities: Error fetching wallet address:', error);
+          }
+        };
+        fetchWalletAddress();
+      }
+    }, [propWalletAddress]);
 
-  const {
-    transactions,
-    loading,
-    refresh,
-    totalCount,
-  } = useTransactionHistory({
-    walletAddress,
-    pageSize: RECENT_PREVIEW_SIZE,
-    page: 1
-  });
+    const { transactions, loading, refresh, totalCount } = useTransactionHistory({
+      walletAddress,
+      pageSize: RECENT_PREVIEW_SIZE,
+      page: 1,
+    });
 
-  useImperativeHandle(ref, () => ({
-    refreshTransactions: () => {
-      refresh();
-    }
-  }), [refresh]);
+    useImperativeHandle(
+      ref,
+      () => ({
+        refreshTransactions: () => {
+          refresh();
+        },
+      }),
+      [refresh],
+    );
 
-  useEffect(() => {
-    if (walletAddress && walletAddress !== "") {
-      refresh();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletAddress]);
+    // Pull-to-refresh
+    const containerRef = useRef(null);
+    const pullStartY = useRef(null);
+    const [pullDistance, setPullDistance] = useState(0);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-  function TransactionList({ transactions }) {
-    if (transactions.length > 0) {
-      return (
-        <>
-          {transactions.map((transaction, index) => (
-            <TransactionItem
-              key={`${transaction.txHash}-${index}`}
-              transaction={transaction}
-              index={index}
-            />
-          ))}
-        </>
-      );
-    } else {
+    const triggerRefresh = useCallback(async () => {
+      setIsRefreshing(true);
+      try {
+        await Promise.all([
+          Promise.resolve(refresh()),
+          onPullRefresh ? Promise.resolve(onPullRefresh()) : Promise.resolve(),
+        ]);
+      } finally {
+        setIsRefreshing(false);
+        setPullDistance(0);
+        pullStartY.current = null;
+      }
+    }, [refresh, onPullRefresh]);
+
+    const handleTouchStart = (e) => {
+      if (!containerRef.current) return;
+      if (containerRef.current.scrollTop > 0) return;
+      pullStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (pullStartY.current === null) return;
+      if (!containerRef.current || containerRef.current.scrollTop > 0) {
+        setPullDistance(0);
+        return;
+      }
+      const delta = e.touches[0].clientY - pullStartY.current;
+      if (delta <= 0) {
+        setPullDistance(0);
+        return;
+      }
+      setPullDistance(Math.min(delta * PULL_DAMPENING, PULL_MAX_PX));
+    };
+
+    const handleTouchEnd = () => {
+      if (isRefreshing) return;
+      if (pullDistance >= PULL_THRESHOLD_PX) {
+        triggerRefresh();
+        return;
+      }
+      setPullDistance(0);
+      pullStartY.current = null;
+    };
+
+    const indicatorHeight = isRefreshing
+      ? PULL_THRESHOLD_PX
+      : Math.round(pullDistance);
+    const indicatorOpacity = isRefreshing
+      ? 1
+      : Math.min(pullDistance / PULL_THRESHOLD_PX, 1);
+    const indicatorRotation = isRefreshing
+      ? 0
+      : Math.min((pullDistance / PULL_THRESHOLD_PX) * 180, 180);
+
+    function TransactionList({ transactions }) {
+      if (transactions.length > 0) {
+        return (
+          <>
+            {transactions.map((transaction, index) => (
+              <TransactionItem
+                key={`${transaction.txHash}-${index}`}
+                transaction={transaction}
+                index={index}
+              />
+            ))}
+          </>
+        );
+      }
       return (
         <div className="mt-5">
           <p className="text-muted">No recent activities.</p>
         </div>
       );
     }
-  }
 
-  return (
-    <div className="recent-activities-widget">
-      <div className="recent-activities-widget-inner">
-        <div className="mt-1">
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="sub-heading">
-              <h4>{RECENT_ACTIVITIES}</h4>
+    return (
+      <div className="recent-activities-widget">
+        <div className="recent-activities-widget-inner">
+          <div className="mt-1">
+            <div className="d-flex justify-content-between align-items-center">
+              <div className="sub-heading">
+                <h4>{RECENT_ACTIVITIES}</h4>
+              </div>
+              {totalCount > RECENT_PREVIEW_SIZE && (
+                <span
+                  className="recent-activities-view-all"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate('/history')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      navigate('/history');
+                    }
+                  }}
+                  style={{
+                    color: COLORS.ORANGE_PRIMARY,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  {VIEW_ALL}
+                  <RightOutlined style={{ fontSize: 12 }} />
+                </span>
+              )}
             </div>
-            {totalCount > RECENT_PREVIEW_SIZE && (
-              <span
-                className="recent-activities-view-all"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate('/history')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    navigate('/history');
-                  }
-                }}
-                style={{
-                  color: COLORS.ORANGE_PRIMARY,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                {VIEW_ALL}
-                <RightOutlined style={{ fontSize: 12 }} />
-              </span>
-            )}
           </div>
-        </div>
 
-        {loading && transactions.length === 0 ? (
-          <div className="mt-5">
-            <Spin
-              indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY }} />}
-              style={{ margin: "10px " }}
-            />
-          </div>
-        ) : (
-          <div className="recent-activity-container">
-            <TransactionList transactions={transactions} />
-          </div>
-        )}
+          {loading && transactions.length === 0 && !isRefreshing ? (
+            <div className="mt-5">
+              <Spin
+                indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY }} />}
+                style={{ margin: '10px ' }}
+              />
+            </div>
+          ) : (
+            <div
+              ref={containerRef}
+              className="recent-activity-container"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+            >
+              <div
+                className="pull-indicator"
+                style={{
+                  height: `${indicatorHeight}px`,
+                  opacity: indicatorOpacity,
+                }}
+                aria-hidden="true"
+              >
+                {isRefreshing ? (
+                  <LoadingOutlined
+                    spin
+                    style={{ fontSize: 22, color: COLORS.ORANGE_PRIMARY }}
+                  />
+                ) : (
+                  <LoadingOutlined
+                    style={{
+                      fontSize: 22,
+                      color: COLORS.ORANGE_PRIMARY,
+                      transform: `rotate(${indicatorRotation}deg)`,
+                      transition: pullStartY.current === null ? 'transform 0.2s ease' : undefined,
+                    }}
+                  />
+                )}
+              </div>
+              <TransactionList transactions={transactions} />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 RecentActivities.displayName = 'RecentActivities';
 

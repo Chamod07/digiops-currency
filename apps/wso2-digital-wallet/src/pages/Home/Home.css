@@ -280,9 +280,22 @@
   margin-top: 12px;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
+}
+
+.pull-indicator {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  flex-shrink: 0;
+  transition: height 0.18s ease-out, opacity 0.18s ease-out;
 }
 
 /* ── TRANSACTION ITEM (shared component, used on Home + History) ── */
