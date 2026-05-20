@@ -6,22 +6,22 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 
 import React, { useEffect, useState, useRef } from "react";
-import { Input, Button, Avatar, message } from "antd";
+import { Avatar, message } from "antd";
 import {
   HomeOutlined,
-  ShareAltOutlined,
   QrcodeOutlined,
+  ShareAltOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "./ReceiveCoins.css";
 import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import { QRCodeSVG } from "qrcode.react";
 import {
-  ERROR_RETRIEVE_WALLET_ADDRESS,
-  ERROR_BRIDGE_NOT_READY,
-  RECEIVE_COINS_TITLE,
   AMOUNT_TO_RECEIVE,
+  ERROR_BRIDGE_NOT_READY,
+  ERROR_RETRIEVE_WALLET_ADDRESS,
   GENERATE_QR_CODE,
+  RECEIVE_COINS_TITLE,
   SHARE_QR_CODE,
   WSO2_TOKEN,
 } from "../../constants/strings";
@@ -39,6 +39,7 @@ function ReceiveCoins() {
   const [walletAddress, setWalletAddress] = useState(DEFAULT_WALLET_ADDRESS);
   const [qrCodeData, setQrCodeData] = useState("");
   const [showQrCode, setShowQrCode] = useState(false);
+  const [isAmountFocused, setIsAmountFocused] = useState(false);
 
   const fetchWalletAddress = async (retryCount = 0) => {
     const maxRetries = 3;
@@ -87,17 +88,16 @@ function ReceiveCoins() {
     // eslint-disable-next-line
   }, []);
 
-  const handleBack = () => {
+  const handleHome = () => {
     navigate("/");
   };
 
   const handleGenerateQrCode = () => {
     if (!receiveAmount || parseFloat(receiveAmount) <= 0) {
-      messageApi.warning("Please enter a valid amount");
+      messageApi.warning("Enter an amount above 0");
       return;
     }
 
-    // Create QR code data with wallet address and amount
     const qrData = JSON.stringify({
       wallet_address: walletAddress,
       coin_amount: receiveAmount,
@@ -105,6 +105,24 @@ function ReceiveCoins() {
 
     setQrCodeData(qrData);
     setShowQrCode(true);
+  };
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*(\.\d*)?$/.test(value)) {
+      setReceiveAmount(value);
+    }
+  };
+
+  const downloadQrBlob = (blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `receive-${receiveAmount}-${WSO2_TOKEN}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const handleShareQrCode = async () => {
@@ -123,56 +141,45 @@ function ReceiveCoins() {
         ctx.drawImage(img, 0, 0);
 
         canvas.toBlob(async (blob) => {
-          try {
-            // Use Web Share API
-            if (navigator.share) {
-              const file = new File(
-                [blob],
-                `receive-${receiveAmount}-${WSO2_TOKEN}.png`,
-                { type: "image/png" },
-              );
-
-              const shareData = {
-                files: [file],
-              };
-
-              try {
-                // Check if canShare is available
-                if (navigator.canShare && navigator.canShare(shareData)) {
-                  await navigator.share(shareData);
-                } else {
-                  await navigator.share(shareData);
-                }
-                messageApi.success("QR code shared successfully");
-              } catch (shareError) {
-                // If sharing with files fails
-                if (shareError.name === "AbortError") {
-                  // User cancelled
-                  console.log("Share cancelled by user");
-                } else {
-                  console.error("Error sharing QR code:", shareError);
-                  messageApi.warning(
-                    "QR Code sharing is not supported on this device.",
-                  );
-                }
-              }
-            } else {
-              messageApi.warning(
-                "QR Code sharing is not supported on this device.",
-              );
-            }
-          } catch (error) {
-            if (error.name === "AbortError") {
-              // User cancelled the share dialog
-              console.log("Share cancelled by user");
-            } else {
-              console.error("Error sharing QR code:", error);
-              messageApi.warning(
-                "QR Code sharing is not supported on this device.",
-              );
-            }
+          if (!blob) {
+            messageApi.error("Couldn't generate QR image");
+            return;
           }
+
+          const file = new File(
+            [blob],
+            `receive-${receiveAmount}-${WSO2_TOKEN}.png`,
+            { type: "image/png" },
+          );
+
+          const canShareFile =
+            typeof navigator !== "undefined" &&
+            typeof navigator.canShare === "function" &&
+            typeof navigator.share === "function" &&
+            navigator.canShare({ files: [file] });
+
+          if (canShareFile) {
+            try {
+              await navigator.share({ files: [file] });
+              messageApi.success("QR code shared");
+            } catch (shareError) {
+              if (shareError.name === "AbortError") {
+                return;
+              }
+              console.error("Error sharing QR code:", shareError);
+              downloadQrBlob(blob);
+              messageApi.success("QR code saved to your device");
+            }
+            return;
+          }
+
+          downloadQrBlob(blob);
+          messageApi.success("QR code saved to your device");
         }, "image/png");
+      };
+
+      img.onerror = () => {
+        messageApi.error("Couldn't render QR code");
       };
 
       img.src =
@@ -180,133 +187,137 @@ function ReceiveCoins() {
         btoa(unescape(encodeURIComponent(svgData)));
     } catch (error) {
       console.error("Error sharing QR code:", error);
-      messageApi.error("Failed to share QR code");
+      messageApi.error("Couldn't share QR code");
     }
   };
 
+  const handleNewQrCode = () => {
+    setShowQrCode(false);
+    setReceiveAmount("");
+    setQrCodeData("");
+  };
+
+  const truncatedAddress =
+    walletAddress && walletAddress.length > 24
+      ? `${walletAddress.slice(0, 12)}...${walletAddress.slice(-10)}`
+      : walletAddress;
+
   return (
-    <div className="receive-coins-container mx-3">
+    <div className="receive-page">
       {contextHolder}
-      <div className="receive-header-section mt-4">
-        <Button
-          type="link"
-          icon={<HomeOutlined />}
-          onClick={handleBack}
-          className="back-button"
+
+      <div className="receive-breadcrumb">
+        <button
+          type="button"
+          className="receive-breadcrumb-btn"
+          onClick={handleHome}
         >
-          Home
-        </Button>
-        <span className="receive-header">{RECEIVE_COINS_TITLE}</span>
-        <div style={{ width: 60 }}></div>
+          <HomeOutlined style={{ fontSize: 13 }} />
+          <span>Home</span>
+        </button>
+        <span className="receive-breadcrumb-sep">›</span>
+        <span className="receive-breadcrumb-current">{RECEIVE_COINS_TITLE}</span>
       </div>
 
       {!showQrCode ? (
-        <div className="receive-input-section">
-          <div className="receive-description">
+        <>
+          <div className="receive-intro">
             Enter the amount you want to receive and generate a QR code to share
-            with the sender
+            with the sender.
           </div>
 
-          <div className="wallet-address-container">
-            <div className="wallet-address-label">Wallet Address</div>
-            <div className="wallet-address-display">{walletAddress}</div>
-            <div className="wallet-address-helper">
+          <div className="receive-form">
+            <div className="receive-field-label">Your Wallet Address</div>
+            <div className="receive-address-card">
+              <div className="receive-address-card-text">{walletAddress}</div>
+            </div>
+            <div className="receive-hint">
               You will receive coins to this wallet
             </div>
           </div>
 
-          <div className="amount-input-container">
-            <div className="amount-label">{AMOUNT_TO_RECEIVE}</div>
-            <div className="amount-input-wrapper">
-              <Input
-                className="amount-input"
+          <div className="receive-form">
+            <div className="receive-field-label">{AMOUNT_TO_RECEIVE}</div>
+            <div className={`receive-amount-wrap ${isAmountFocused ? "is-focused" : ""}`}>
+              <input
+                className="receive-amount-input"
+                type="text"
+                inputMode="decimal"
                 placeholder="0"
                 value={receiveAmount}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*(\.\d*)?$/.test(value)) {
-                    setReceiveAmount(value);
-                  }
-                }}
-                size="large"
+                onChange={handleAmountChange}
+                onFocus={() => setIsAmountFocused(true)}
+                onBlur={() => setIsAmountFocused(false)}
                 autoFocus
               />
-              <div className="currency-badge">
-                <Avatar size={24} src={Wso2MainImg} />
-                <span>{WSO2_TOKEN}</span>
+              <div className="receive-ticker-pill">
+                <Avatar size={20} src={Wso2MainImg} />
+                <span className="receive-ticker-text">{WSO2_TOKEN}</span>
               </div>
             </div>
           </div>
 
-          <Button
-            block
-            className="primary-button generate-qr-button"
+          <button
+            type="button"
+            className={`receive-primary-btn ${
+              !receiveAmount || parseFloat(receiveAmount) <= 0 ? "is-disabled" : ""
+            }`}
             onClick={handleGenerateQrCode}
             disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
-            icon={<QrcodeOutlined />}
           >
-            {GENERATE_QR_CODE}
-          </Button>
-        </div>
+            <QrcodeOutlined style={{ fontSize: 16 }} />
+            <span>{GENERATE_QR_CODE}</span>
+          </button>
+        </>
       ) : (
-        <div className="qr-code-display">
-          <div className="qr-display-description">
-            Share this QR code with the sender to receive payment
+        <>
+          <div className="receive-intro">
+            Share this QR code with the sender to receive payment.
           </div>
 
-          <div className="qr-code-section" ref={qrCodeRef}>
-            <div className="qr-code-wrapper">
-              <QRCodeSVG
-                value={qrCodeData}
-                size={220}
-                level="M"
-                includeMargin={true}
-              />
+          <div className="receive-qr-card" ref={qrCodeRef}>
+            <div className="receive-qr-canvas">
+              <QRCodeSVG value={qrCodeData} size={220} level="M" includeMargin />
             </div>
-            <div className="qr-code-info">
-              <div className="qr-info-item">
-                <span className="qr-info-label">Amount</span>
-                <div className="qr-info-value-container">
-                  <span className="qr-info-value">{receiveAmount}</span>
-                  <div className="currency-badge">
-                    <Avatar size={24} src={Wso2MainImg} />
-                    <span>{WSO2_TOKEN}</span>
+
+            <div className="receive-qr-info">
+              <div className="receive-qr-row">
+                <span className="receive-qr-label">Amount</span>
+                <div className="receive-qr-amount">
+                  <span className="receive-qr-amount-num">{receiveAmount}</span>
+                  <div className="receive-ticker-pill receive-ticker-pill-sm">
+                    <Avatar size={18} src={Wso2MainImg} />
+                    <span className="receive-ticker-text">{WSO2_TOKEN}</span>
                   </div>
                 </div>
               </div>
-              <div className="qr-info-divider"></div>
-              <div className="qr-info-item">
-                <span className="qr-info-label">Your Wallet Address</span>
-                <span className="qr-info-value wallet-address-text">
-                  {walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}
-                </span>
+              <div className="receive-qr-divider" />
+              <div className="receive-qr-row receive-qr-row-stacked">
+                <span className="receive-qr-label">Wallet Address</span>
+                <span className="receive-qr-address">{truncatedAddress}</span>
               </div>
             </div>
           </div>
 
-          <div className="qr-actions">
-            <div className="action-buttons-row">
-              <Button
-                className="default-button action-button"
-                onClick={() => {
-                  setShowQrCode(false);
-                  setReceiveAmount("");
-                  setQrCodeData("");
-                }}
-                icon={<QrcodeOutlined />}
-              >
-                New QR Code
-              </Button>
-              <Button
-                className="primary-button action-button"
-                onClick={handleShareQrCode}
-                icon={<ShareAltOutlined />}
-              >
-                {SHARE_QR_CODE}
-              </Button>
-            </div>
+          <div className="receive-actions">
+            <button
+              type="button"
+              className="receive-secondary-btn"
+              onClick={handleNewQrCode}
+            >
+              <QrcodeOutlined style={{ fontSize: 14 }} />
+              <span>New QR Code</span>
+            </button>
+            <button
+              type="button"
+              className="receive-primary-btn receive-primary-btn-inline"
+              onClick={handleShareQrCode}
+            >
+              <ShareAltOutlined style={{ fontSize: 14 }} />
+              <span>{SHARE_QR_CODE}</span>
+            </button>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
