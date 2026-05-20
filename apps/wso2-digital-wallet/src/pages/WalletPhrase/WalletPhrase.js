@@ -5,42 +5,59 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import React, { useState, useEffect } from "react";
-import { Row, Col, Alert, Button, message, Modal } from "antd";
-import { ExclamationCircleFilled, ArrowRightOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useMemo } from "react";
+import { message, Modal } from "antd";
+import {
+  ArrowRightOutlined,
+  CheckOutlined,
+  CopyOutlined,
+  EyeOutlined,
+  WarningFilled,
+} from "@ant-design/icons";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import "./WalletPhrase.css";
-import WalletAddressCopy from "../../components/Home/WalletAddressCopy";
-import PhraseCopy from "../../components/Home/PhraseCopy";
 import { useNavigate } from "react-router-dom";
 import {
+  CONFIRM_RECOVERY_PHRASE,
+  CONTINUE,
+  COPIED,
+  COPY_TO_CLIPBOARD,
+  ERROR_READING_WALLET_DETAILS,
+  PHRASE_COPIED,
   RECOVERY_PHRASE,
   RECOVERY_PHRASE_WARNING_TEXT,
-  CONTINUE,
+  SUCCESS,
   WALLET_ADDRESS,
   WALLET_PRIVATE_KEY,
-  ERROR_READING_WALLET_DETAILS,
-  WALLET_SECURE_TIPS,
-  SHOW_WALLET_ADDRESS,
-  CONFIRM_RECOVERY_PHRASE
 } from "../../constants/strings";
 import { STORAGE_KEYS } from "../../constants/configs";
 import { getLocalDataAsync } from "../../helpers/storage";
+import { showToast } from "../../helpers/alerts";
 
 function WalletPhrase(props) {
+  const { walletPhrase } = props;
+  const navigate = useNavigate();
+
   const [walletAddress, setWalletAddress] = useState("");
   const [walletPrivateKey, setWalletPrivateKey] = useState("");
-  const { walletPhrase, onGoBack } = props;
-  const navigate = useNavigate();
+
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isPrivateKeyModalOpen, setIsPrivateKeyModalOpen] = useState(false);
+  const [isContinueModalOpen, setIsContinueModalOpen] = useState(false);
+
+  const [isPhraseCopied, setIsPhraseCopied] = useState(false);
+  const [isAddressCopied, setIsAddressCopied] = useState(false);
+  const [isPrivateKeyCopied, setIsPrivateKeyCopied] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
 
   const fetchWalletDetails = async () => {
     try {
       const walletAddressResponse = await getLocalDataAsync(
-        STORAGE_KEYS.WALLET_ADDRESS
+        STORAGE_KEYS.WALLET_ADDRESS,
       );
       const privateKeyResponse = await getLocalDataAsync(
-        STORAGE_KEYS.PRIVATE_KEY
+        STORAGE_KEYS.PRIVATE_KEY,
       );
       setWalletPrivateKey(privateKeyResponse);
       setWalletAddress(walletAddressResponse);
@@ -55,135 +72,200 @@ function WalletPhrase(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleContinue = () => {
-    Modal.confirm({
-      title: "Backing Up Recovery Phrase",
-      content: (
-        <div>
-          <p>{CONFIRM_RECOVERY_PHRASE}</p>
-        </div>
-      ),
-      okText: "Yes, I have saved it",
-      cancelText: "Go Back",
-      cancelButtonProps: {
-        style: {
-          backgroundColor: "#ffffff",
-          border: "1px solid #8c8c8c",
-          color: "rgba(0, 0, 0, 0.88)",
-          fontWeight: 600,
-          fontSize: "14px",
-          height: "36px",
-          lineHeight: "36px",
-          padding: "0 16px",
-          borderRadius: "9px",
-        }
-      },
-      okButtonProps: {
-        style: {
-          backgroundColor: "#ffffff",
-          border: "1px solid #dc3545",
-          color: "#dc3545",
-          fontWeight: 600,
-          fontSize: "14px",
-          height: "36px",
-          lineHeight: "36px",
-          padding: "0 16px",
-          borderRadius: "9px",
-        }
-      },
-      onOk() {
-        navigate("/");
-      },
-      centered: true,
-    });
+  const phraseWords = useMemo(
+    () => (walletPhrase ? walletPhrase.split(" ") : []),
+    [walletPhrase],
+  );
+
+  const handleCopyPhrase = () => {
+    showToast(SUCCESS, PHRASE_COPIED);
+    setIsPhraseCopied(true);
+    setTimeout(() => setIsPhraseCopied(false), 2000);
   };
 
-  const handleClick = () => {
-    onGoBack(false);
+  const handleCopyAddress = () => {
+    showToast(SUCCESS, `${WALLET_ADDRESS} ${COPIED}`);
+    setIsAddressCopied(true);
+    setTimeout(() => setIsAddressCopied(false), 2000);
   };
+
+  const handleCopyPrivateKey = () => {
+    showToast(SUCCESS, `${WALLET_PRIVATE_KEY} ${COPIED}`);
+    setIsPrivateKeyCopied(true);
+    setTimeout(() => setIsPrivateKeyCopied(false), 2000);
+  };
+
+  const handleConfirmBackup = () => {
+    setIsContinueModalOpen(false);
+    navigate("/");
+  };
+
+  const isContinueDisabled = !walletAddress || !walletPrivateKey;
 
   return (
-    <div className="wallet-phrase">
+    <div className="wp-page">
       {contextHolder}
-      <Row justify="center" align="middle">
-        <Col flex="auto">
-          <span className="recovery-phrase-header">{RECOVERY_PHRASE}</span>
-        </Col>
-      </Row>
 
-      <div className="create-wallet-content container">
-        <div className="mt-4">
-          <Alert
-            message={RECOVERY_PHRASE_WARNING_TEXT}
-            type="error"
-            showIcon
-            icon={<ExclamationCircleFilled />}
-            style={{
-              color: "red",
-              textAlign: "left",
-              display: "flex",
-              alignItems: "center"
-            }}
-            iconStyle={{ marginRight: "100px" }}
-          />
-        </div>
-        {/* <div className="mt-3">
-          <Alert
-            message={
-              <span className="custom-alert-message">
-                <ul style={{ textAlign: "left" }}>
-                  {WALLET_SECURE_TIPS.map((tip, index) => (
-                    <li key={index}>{tip}</li>
-                  ))}
-                </ul>
-              </span>
-            }
-            icon={<ExclamationCircleFilled />}
-            showIcon
-            style={{
-              color: "green",
-              textAlign: "left",
-              display: "flex",
-              alignItems: "center"
-            }}
-            type="success"
-          />
-        </div> */}
-        <div className="mt-3">
-          <WalletAddressCopy
-            address={walletAddress}
-            topic={WALLET_ADDRESS}
-            buttonText={SHOW_WALLET_ADDRESS}
-          />
-        </div>
-        <div className="mt-3">
-          <WalletAddressCopy
-            address={walletPrivateKey}
-            topic={WALLET_PRIVATE_KEY}
-          />
-        </div>
-        <div className="mt-3">
-          <PhraseCopy phrase={walletPhrase} />
-        </div>
-        <div className="mt-4 mb-1">
-          <Button
-            block
-            disabled={walletPrivateKey === "" || walletAddress === ""}
-            className="primary-button"
-            size="large"
-            onClick={handleContinue}
-            icon={<ArrowRightOutlined />}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
+      <div className="wp-header">
+        <h1 className="wp-title">{RECOVERY_PHRASE}</h1>
+        <p className="wp-subtitle">Your new wallet has been created</p>
+      </div>
+
+      <div className="wp-danger-chip">
+        <WarningFilled
+          style={{ color: "#EF4444", fontSize: 16, flexShrink: 0 }}
+        />
+        <span className="wp-danger-text">{RECOVERY_PHRASE_WARNING_TEXT}</span>
+      </div>
+
+      <div className="wp-key-section">
+        <div className="wp-key-row">
+          <div className="wp-key-label">Public Wallet Address</div>
+          <button
+            type="button"
+            className="wp-key-btn"
+            onClick={() => setIsAddressModalOpen(true)}
+            disabled={!walletAddress}
           >
-            {CONTINUE}
-          </Button>
+            <EyeOutlined style={{ fontSize: 14 }} />
+            <span>Show Wallet Address</span>
+          </button>
+        </div>
+
+        <div className="wp-key-row">
+          <div className="wp-key-label">Private Wallet Key</div>
+          <button
+            type="button"
+            className="wp-key-btn wp-key-btn-danger"
+            onClick={() => setIsPrivateKeyModalOpen(true)}
+            disabled={!walletPrivateKey}
+          >
+            <EyeOutlined style={{ fontSize: 14 }} />
+            <span>Show Private Key</span>
+          </button>
         </div>
       </div>
+
+      <div className="wp-phrase-card">
+        <div className="wp-phrase-grid">
+          {phraseWords.map((word, i) => (
+            <div className="wp-phrase-cell" key={`${word}-${i}`}>
+              <span className="wp-phrase-num">{i + 1}</span>
+              <span className="wp-phrase-word">{word}</span>
+            </div>
+          ))}
+        </div>
+        <CopyToClipboard text={walletPhrase || ""} onCopy={handleCopyPhrase}>
+          <button
+            type="button"
+            className={`wp-copy-btn ${isPhraseCopied ? "is-copied" : ""}`}
+          >
+            {isPhraseCopied ? (
+              <CheckOutlined style={{ fontSize: 14 }} />
+            ) : (
+              <CopyOutlined style={{ fontSize: 14 }} />
+            )}
+            <span>{isPhraseCopied ? PHRASE_COPIED : COPY_TO_CLIPBOARD}</span>
+          </button>
+        </CopyToClipboard>
+      </div>
+
+      <div className="wp-footer">
+        <button
+          type="button"
+          className="wp-continue-btn"
+          onClick={() => setIsContinueModalOpen(true)}
+          disabled={isContinueDisabled}
+        >
+          <span>{CONTINUE}</span>
+          <ArrowRightOutlined style={{ fontSize: 14 }} />
+        </button>
+      </div>
+
+      {/* Show Wallet Address Modal */}
+      <Modal
+        open={isAddressModalOpen}
+        onCancel={() => setIsAddressModalOpen(false)}
+        footer={null}
+        title="Wallet Address"
+        centered
+      >
+        <div className="wp-modal">
+          <div className="wp-modal-hint">
+            This is your public wallet address. Safe to share with anyone.
+          </div>
+          <CopyToClipboard text={walletAddress || ""} onCopy={handleCopyAddress}>
+            <button type="button" className="wp-modal-value">
+              <span className="wp-modal-value-text">{walletAddress}</span>
+              {isAddressCopied ? <CheckOutlined /> : <CopyOutlined />}
+            </button>
+          </CopyToClipboard>
+        </div>
+      </Modal>
+
+      {/* Show Private Key Modal */}
+      <Modal
+        open={isPrivateKeyModalOpen}
+        onCancel={() => setIsPrivateKeyModalOpen(false)}
+        footer={null}
+        title="Private Key"
+        centered
+      >
+        <div className="wp-modal">
+          <div className="wp-modal-warning">
+            <WarningFilled
+              style={{ color: "#EF4444", fontSize: 14, flexShrink: 0 }}
+            />
+            <span>
+              Anyone with this key has full access to your wallet. Never share
+              it.
+            </span>
+          </div>
+          <CopyToClipboard
+            text={walletPrivateKey || ""}
+            onCopy={handleCopyPrivateKey}
+          >
+            <button type="button" className="wp-modal-value">
+              <span className="wp-modal-value-text">{walletPrivateKey}</span>
+              {isPrivateKeyCopied ? <CheckOutlined /> : <CopyOutlined />}
+            </button>
+          </CopyToClipboard>
+        </div>
+      </Modal>
+
+      {/* Continue / Backup Confirmation Modal */}
+      <Modal
+        open={isContinueModalOpen}
+        onCancel={() => setIsContinueModalOpen(false)}
+        footer={null}
+        title="Back up your recovery phrase?"
+        centered
+      >
+        <div className="wp-modal">
+          <div className="wp-modal-warning">
+            <WarningFilled
+              style={{ color: "#EF4444", fontSize: 14, flexShrink: 0 }}
+            />
+            <span>{CONFIRM_RECOVERY_PHRASE}</span>
+          </div>
+          <div className="wp-modal-actions">
+            <button
+              type="button"
+              className="wp-modal-cancel"
+              onClick={() => setIsContinueModalOpen(false)}
+            >
+              Go Back
+            </button>
+            <button
+              type="button"
+              className="wp-modal-confirm"
+              onClick={handleConfirmBackup}
+            >
+              Yes, I have saved it
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
