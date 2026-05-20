@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getWalletBalanceByWalletAddress, getCurrentBlockNumber } from '../services/blockchain.service';
+import { getUserWalletAddresses } from './wallet.service';
 
 export function useWalletBalance(walletAddress, options = {}) {
   const isValidAddress = typeof walletAddress === 'string' && walletAddress.startsWith('0x') && walletAddress.length === 42;
@@ -26,6 +27,17 @@ export function useBlockNumber(options = {}) {
     queryKey: ['blockNumber'],
     queryFn: getCurrentBlockNumber,
     staleTime: 10_000, // Data is considered fresh for 10 seconds
+    ...options,
+  });
+}
+
+export function useUserWallets(options = {}) {
+  return useQuery({
+    queryKey: ['userWallets'],
+    queryFn: getUserWalletAddresses,
+    staleTime: 1000 * 60 * 5, // 5 minutes — wallets list rarely changes
+    retry: 2,
+    retryDelay: (attemptIndex) => 1000 * (attemptIndex + 1),
     ...options,
   });
 }

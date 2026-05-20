@@ -134,36 +134,88 @@
   flex-shrink: 0;
 }
 
-/* My Wallets section */
-.profile-wallets {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* My Wallets — disclosure card with animated body */
+.profile-wallets-card {
+  overflow: hidden;
 }
 
-.profile-wallet-card {
+.profile-wallets-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.22s ease-in-out;
+}
+
+.profile-wallets-body.is-open {
+  max-height: 1200px;
+  opacity: 1;
+  transition: max-height 0.36s ease-in-out, opacity 0.26s ease-in-out 0.04s;
+}
+
+.profile-wallets-body-inner {
+  border-top: 1px solid #F0EDE8;
+}
+
+.profile-wallets-legend {
+  padding: 12px 16px;
+  background: #FAFAF9;
+  border-bottom: 1px solid #F0EDE8;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-wallets-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-wallets-legend-text {
+  font-size: 12px;
+  color: #78716C;
+  line-height: 1.4;
+}
+
+.profile-wallets-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-wallet-row {
   width: 100%;
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #F0EDE8;
   padding: 14px 16px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: background 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   font-family: inherit;
   text-align: left;
+  transition: background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.profile-wallet-card:focus {
+.profile-wallet-row:not(:last-child) {
+  border-bottom: 1px solid #F0EDE8;
+}
+
+.profile-wallet-row:focus {
   outline: none;
 }
 
-.profile-wallet-card:active {
+.profile-wallet-row:active {
   background: #FAFAF9;
+}
+
+.profile-wallet-row.is-active {
+  background: #FFFBF7;
+}
+
+.profile-wallet-row.is-active:active {
+  background: #FFF4EC;
 }
 
 .profile-wallet-info {
@@ -188,6 +240,13 @@
   color: #78716C;
 }
 
+.profile-wallet-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .profile-primary-tag {
   background: #F0FDF4;
   border: 1px solid rgba(34, 197, 94, 0.3);
@@ -201,17 +260,17 @@
   flex-shrink: 0;
 }
 
-.profile-wallets-loading {
-  display: flex;
-  justify-content: center;
-  padding: 20px 0;
-}
-
-.profile-wallets-empty {
-  text-align: center;
-  font-size: 13px;
-  color: #9CA3AF;
-  padding: 16px 0;
+.profile-active-tag {
+  background: #FFF7ED;
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  color: var(--orange-primary, #ff7300);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
 }
 
 /* Logout card sits at end of content flow */
@@ -242,13 +301,82 @@
 }
 
 .profile-modal-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 16px;
 }
 
-.profile-modal-action {
+.profile-modal-explainer {
+  background: #FAFAF9;
+  border: 1px solid #F0EDE8;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.profile-modal-explainer.is-primary {
+  background: #F0FDF4;
+  border-color: rgba(34, 197, 94, 0.22);
+}
+
+.profile-modal-explainer-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1C1917;
+  letter-spacing: -0.2px;
+  margin-bottom: 4px;
+}
+
+.profile-modal-explainer.is-primary .profile-modal-explainer-title {
+  color: #166534;
+}
+
+.profile-modal-explainer-text {
+  font-size: 12px;
+  color: #78716C;
+  line-height: 1.5;
+}
+
+.profile-modal-explainer.is-primary .profile-modal-explainer-text {
+  color: #15803D;
+}
+
+.profile-modal-primary-btn {
+  width: 100%;
+  height: 48px;
+  background: var(--orange-primary, #ff7300);
+  border: none;
+  border-radius: 14px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 16px;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.28);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.profile-modal-primary-btn:focus {
+  outline: none;
+}
+
+.profile-modal-primary-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.profile-modal-primary-btn:disabled {
+  background: #E5E0D8;
+  color: #9CA3AF;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 /* QR modal */
