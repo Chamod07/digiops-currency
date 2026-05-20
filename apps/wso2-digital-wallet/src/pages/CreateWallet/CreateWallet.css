@@ -1,4 +1,4 @@
-/* 
+/*
 // Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 //
 // This software is the property of WSO2 LLC. and its suppliers, if any.
@@ -7,69 +7,156 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 */
 
-.wallet-create-top-margin {
-    margin-top: 40% !important;
-    padding: 20px;
-}
-.wallet-create-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-.wallet-create-topic {
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 50px;
-    letter-spacing: 0.20000000298023224px;
-    text-align: center;
-}
-.create-wallet-content {
-    max-height: 80vh;
-    overflow-y: scroll !important;
-}
-.wallet-create-restore-wallet {
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 21px;
-    letter-spacing: 0em;
-    text-align: center;
-    color: var(--orange-primary);
-    cursor: pointer;
-}
-.wallet-copy-topic {
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 19px;
-    letter-spacing: 0em;
-    text-align: center;
-}
-.copy-button {
-    color: #ffff !important;
-    background-color: var(--orange-primary) !important;
-    border: var(--orange-primary) !important;
-}
-.copy-button:hover {
-    color: #ffff !important;
-    background-color: var(--orange-primary) !important;
-    border: var(--orange-primary) !important;
-}
-.ant-input-group-addon {
-    background-color: var(--orange-primary) !important;
-}
-.copy-to-clipboard-button {
-    background: rgba(255, 115, 0, 0.2);
-    color: var(--orange-primary) !important;
-    font-weight: 700;
-}
-.copy-to-clipboard-button:hover, .copy-to-clipboard-button:focus {
-    border: none !important;
-}
-.create-wallet-button {
-    margin-top: 20% !important;
+/* ── CREATE / ONBOARD WALLET PAGE ──────────────────────────────── */
+
+.cw-page {
+  min-height: calc(100vh - 36px);
+  display: flex;
+  flex-direction: column;
 }
 
-.footer-wrapper-buttons-section {
-    position: fixed;
-    bottom: 50px;
+.cw-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 18px;
+}
+
+.cw-logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  box-shadow:
+    0 0 0 8px rgba(249, 115, 22, 0.08),
+    0 0 0 16px rgba(249, 115, 22, 0.04);
+}
+
+.cw-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #1C1917;
+  letter-spacing: -1px;
+  text-align: center;
+  margin: 0;
+}
+
+.cw-subtitle {
+  font-size: 14px;
+  color: #9CA3AF;
+  text-align: center;
+  line-height: 1.55;
+  font-weight: 400;
+  max-width: 260px;
+}
+
+.cw-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 24px 32px;
+}
+
+.cw-btn-primary {
+  height: 56px;
+  background: var(--orange-primary, #ff7300);
+  border: none;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  transition: all 0.15s ease;
+  box-shadow: 0 10px 24px rgba(249, 115, 22, 0.32);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cw-btn-primary:focus {
+  outline: none;
+}
+
+.cw-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 5px 12px rgba(249, 115, 22, 0.2);
+}
+
+.cw-btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cw-btn-ghost {
+  height: 52px;
+  background: transparent;
+  border: none;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--orange-primary, #ff7300);
+  letter-spacing: -0.2px;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cw-btn-ghost:focus {
+  outline: none;
+}
+
+.cw-btn-ghost:active:not(:disabled) {
+  background: #FFF7ED;
+}
+
+.cw-btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── SHARED CLASSES USED BY OTHER COMPONENTS ───────────────────── */
+/* `copy-button` is used by WalletAddressCopy.jsx for the inline copy icon. */
+/* `copy-to-clipboard-button` is used by PhraseCopy.jsx for the copy CTA. */
+/* `ant-input-group-addon` overrides the AntD Input addon background. */
+
+.copy-button {
+  color: #ffffff !important;
+  background-color: var(--orange-primary) !important;
+  border: var(--orange-primary) !important;
+}
+
+.copy-button:hover {
+  color: #ffffff !important;
+  background-color: var(--orange-primary) !important;
+  border: var(--orange-primary) !important;
+}
+
+.ant-input-group-addon {
+  background-color: var(--orange-primary) !important;
+}
+
+.copy-to-clipboard-button {
+  background: rgba(255, 115, 0, 0.2);
+  color: var(--orange-primary) !important;
+  font-weight: 700;
+}
+
+.copy-to-clipboard-button:hover,
+.copy-to-clipboard-button:focus {
+  border: none !important;
 }

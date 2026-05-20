@@ -5,9 +5,13 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import { Avatar, Button } from "antd";
+import { Avatar } from "antd";
 import { useEffect, useState } from "react";
-import { PlusOutlined, UndoOutlined } from "@ant-design/icons";
+import {
+  LoadingOutlined,
+  PlusOutlined,
+  UndoOutlined,
+} from "@ant-design/icons";
 import "./CreateWallet.css";
 import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import { ethers } from "ethers";
@@ -92,51 +96,48 @@ function CreateWallet() {
     setIsWalletCreated(value);
   };
 
-  return (
-    <div>
-      {!isWalletCreated ? (
-        <div className="wallet-create-top-margin">
-          <div className="wallet-create-content">
-            <Avatar size={100} src={Wso2MainImg} />
-            <span className="wallet-create-topic mt-3 mb-5">{WSO2_WALLET}</span>
+  if (isWalletCreated) {
+    return <WalletPhrase walletPhrase={walletPhrase} onGoBack={handleGoBack} />;
+  }
 
-            <div className="footer-wrapper-buttons-section container">
-              <Button
-                block
-                className="primary-button create-wallet-button mb-4"
-                size="large"
-                onClick={handleCreateNewWallet}
-                loading={walletCreateLoading}
-                icon={<PlusOutlined />}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
-              >
-                {CREATE_A_NEW_WALLET}
-              </Button>
-              <span
-                onClick={handleRestoreWallet}
-                className="wallet-create-restore-wallet mt-4"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  cursor: "pointer",
-                }}
-              >
-                <UndoOutlined />
-                {RESTORE_EXISTING_WALLET}
-              </span>
-            </div>
-          </div>
+  return (
+    <div className="cw-page">
+      <div className="cw-body">
+        <div className="cw-logo">
+          <Avatar size={96} src={Wso2MainImg} />
         </div>
-      ) : (
-        <WalletPhrase walletPhrase={walletPhrase} onGoBack={handleGoBack} />
-      )}
+        <div className="cw-title">{WSO2_WALLET}</div>
+        <div className="cw-subtitle">
+          Your secure gateway to the O2C blockchain ecosystem
+        </div>
+      </div>
+
+      <div className="cw-footer">
+        <button
+          type="button"
+          className="cw-btn-primary"
+          onClick={handleCreateNewWallet}
+          disabled={walletCreateLoading}
+        >
+          {walletCreateLoading ? (
+            <LoadingOutlined style={{ fontSize: 16 }} spin />
+          ) : (
+            <PlusOutlined style={{ fontSize: 16 }} />
+          )}
+          <span>
+            {walletCreateLoading ? "Creating wallet..." : CREATE_A_NEW_WALLET}
+          </span>
+        </button>
+        <button
+          type="button"
+          className="cw-btn-ghost"
+          onClick={handleRestoreWallet}
+          disabled={walletCreateLoading}
+        >
+          <UndoOutlined style={{ fontSize: 14 }} />
+          <span>{RESTORE_EXISTING_WALLET}</span>
+        </button>
+      </div>
     </div>
   );
 }
