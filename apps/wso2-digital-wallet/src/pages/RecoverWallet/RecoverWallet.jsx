@@ -5,73 +5,91 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import { Input, Button } from 'antd';
 import React, { useState } from 'react';
-import { ArrowRightOutlined, UndoOutlined } from '@ant-design/icons';
-import { Col, Row } from 'reactstrap';
-import { ethers } from 'ethers';
-import WalletAddressCopy from '../../components/Home/WalletAddressCopy'
-import { useNavigate } from "react-router-dom";
-import './RecoverWallet.css'
+import { message, Modal } from 'antd';
 import {
-  RECOVER_WALLET,
-  PASTE_PHRASE_HERE,
-  RECOVER_YOUR_WALLET,
+  ArrowRightOutlined,
+  CheckCircleFilled,
+  CheckOutlined,
+  CopyOutlined,
+  EyeOutlined,
+  LeftOutlined,
+  LoadingOutlined,
+  UndoOutlined,
+  WarningFilled,
+} from '@ant-design/icons';
+import { ethers } from 'ethers';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useNavigate } from 'react-router-dom';
+import './RecoverWallet.css';
+import {
   CONTINUE,
+  COPIED,
+  ERROR,
+  OK,
+  RECOVER_WALLET,
+  RECOVER_WALLET_ERROR,
+  RECOVER_YOUR_WALLET,
+  SUCCESS,
   WALLET_ADDRESS,
   WALLET_PRIVATE_KEY,
-  OK,
-  ERROR,
-  RECOVER_WALLET_ERROR,
-  SHOW_WALLET_ADDRESS
-} from '../../constants/strings'
+} from '../../constants/strings';
 import { PASS_PHRASE_LENGTH, STORAGE_KEYS } from '../../constants/configs';
 import { saveLocalDataAsync } from '../../helpers/storage';
-import { showAlertBox } from '../../helpers/alerts';
+import { showAlertBox, showToast } from '../../helpers/alerts';
 
 export default function RecoverWallet() {
-
   const navigate = useNavigate();
 
-  const [wordList, setWordList] = useState(Array(12).fill(''));
+  const [wordList, setWordList] = useState(Array(PASS_PHRASE_LENGTH).fill(''));
   const [walletAddress, setWalletAddress] = useState('');
   const [privateKey, setPrivateKey] = useState('');
-  const [continueRecover, setContinueRecover] = useState(false)
-  const [walletRecovered, setWalletRecovered] = useState(false)
+  const [walletRecovered, setWalletRecovered] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (index, value) => {
-    let newWordList = [...wordList];
-    const words = value.trim().split(/\s+/).filter(word => word.length > 0);
-    if (words.length === PASS_PHRASE_LENGTH) {
-      // If 12 words detected, fill all boxes
-      for (let i = 0; i < Math.min(words.length, 12); i++) {
-        newWordList[i] = words[i];
-      }
-    } else {
-      newWordList[index] = value;
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isPrivateKeyModalOpen, setIsPrivateKeyModalOpen] = useState(false);
+  const [isAddressCopied, setIsAddressCopied] = useState(false);
+  const [isPrivateKeyCopied, setIsPrivateKeyCopied] = useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const isFullPhrase = (list) =>
+    list.filter((w) => w && w.trim()).length === PASS_PHRASE_LENGTH;
+  const continueRecover = isFullPhrase(wordList);
+
+  const fillAllWords = (words) => {
+    const next = Array(PASS_PHRASE_LENGTH).fill('');
+    for (let i = 0; i < Math.min(words.length, PASS_PHRASE_LENGTH); i++) {
+      next[i] = words[i];
     }
-    setWordList(newWordList);
-    const allWordsFilled = newWordList.filter(word => word && word.trim()).length === PASS_PHRASE_LENGTH;
-    setContinueRecover(allWordsFilled);
+    setWordList(next);
+  };
+
+  const handleInputChange = (index, value) => {
+    const words = value
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
+    if (words.length === PASS_PHRASE_LENGTH) {
+      fillAllWords(words);
+      return;
+    }
+    const next = [...wordList];
+    next[index] = value;
+    setWordList(next);
   };
 
   const handlePaste = (index, e) => {
-    e.preventDefault();
     const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-    const words = pastedText.trim().split(/\s+/).filter(word => word.length > 0);
-    
+    const words = pastedText
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
+
     if (words.length === PASS_PHRASE_LENGTH) {
-      // If 12 words pasted, fill all boxes
-      let newWordList = [...wordList];
-      for (let i = 0; i < Math.min(words.length, 12); i++) {
-        newWordList[i] = words[i];
-      }
-      setWordList(newWordList);
-      const allWordsFilled = newWordList.filter(word => word && word.trim()).length === PASS_PHRASE_LENGTH;
-      setContinueRecover(allWordsFilled);
-    } else {
-      handleInputChange(index, pastedText);
+      e.preventDefault();
+      fillAllWords(words);
     }
   };
 
@@ -85,12 +103,11 @@ export default function RecoverWallet() {
         setWalletAddress(wallet.address);
         setPrivateKey(wallet.privateKey);
 
-        //save wallet address and private key to local storage
-        await saveLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS, wallet.address)
-        await saveLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY, wallet.privateKey)
+        await saveLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS, wallet.address);
+        await saveLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY, wallet.privateKey);
 
         if (wallet.address) {
-          setWalletRecovered(true)
+          setWalletRecovered(true);
         }
       } catch (error) {
         setWalletRecovered(false);
@@ -101,93 +118,189 @@ export default function RecoverWallet() {
     }, 2000);
   };
 
-  const renderInputs = () => {
-    const inputs = [];
-    for (let i = 0; i < 12; i++) {
-      inputs.push(
-        <Col md="6" sm="6" xs="6" key={i}>
-          <div className="input-container mt-2">
-            <label className="input-label">{i + 1}</label>
-            <Input
-              value={wordList[i]}
-              onChange={(event) => handleInputChange(i, event.target.value)}
-              onPaste={(e) => handlePaste(i, e)}
-            />
-          </div>
-        </Col>
-      );
-    }
-    return inputs;
+  const handleBack = () => {
+    navigate('/create-wallet');
   };
 
   const handleContinue = () => {
-    navigate("/");
-  }
+    navigate('/');
+  };
+
+  const handleCopyAddress = () => {
+    showToast(SUCCESS, `${WALLET_ADDRESS} ${COPIED}`);
+    setIsAddressCopied(true);
+    setTimeout(() => setIsAddressCopied(false), 2000);
+  };
+
+  const handleCopyPrivateKey = () => {
+    showToast(SUCCESS, `${WALLET_PRIVATE_KEY} ${COPIED}`);
+    setIsPrivateKeyCopied(true);
+    setTimeout(() => setIsPrivateKeyCopied(false), 2000);
+  };
 
   return (
-    <div className="mx-3">
-      <div className='mt-5 d-flex justify-content-center'>
-        <h3>{RECOVER_YOUR_WALLET}</h3>
-      </div>
-      <div className="text-sm">
-        {PASTE_PHRASE_HERE}
+    <div className="rw-page">
+      {contextHolder}
+
+      {!walletRecovered && (
+        <button
+          type="button"
+          className="rw-back-btn"
+          onClick={handleBack}
+          aria-label="Back"
+        >
+          <LeftOutlined style={{ fontSize: 16, color: '#1C1917' }} />
+        </button>
+      )}
+
+      <div className="rw-header">
+        <h1 className="rw-title">
+          {walletRecovered ? 'Wallet Recovered' : RECOVER_YOUR_WALLET}
+        </h1>
+        <p className="rw-subtitle">
+          {walletRecovered
+            ? 'Your wallet has been restored on this device.'
+            : 'Enter your 12-word recovery phrase in the correct order.'}
+        </p>
       </div>
 
-      <div className='recover-wallet-content container'>
-        <Row className='mt-3'>{renderInputs()}</Row>
+      {!walletRecovered ? (
+        <>
+          <div className="rw-seed-grid">
+            {wordList.map((word, i) => (
+              <div className="rw-seed-cell" key={i}>
+                <span className="rw-seed-num">{i + 1}</span>
+                <input
+                  className="rw-seed-input"
+                  type="text"
+                  placeholder={`word ${i + 1}`}
+                  value={word}
+                  onChange={(e) => handleInputChange(i, e.target.value)}
+                  onPaste={(e) => handlePaste(i, e)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                />
+              </div>
+            ))}
+          </div>
 
-        <div className='mb-5'>
-          {
-            !walletRecovered ? (
-              <Button 
-                className={`mt-5 primary-button${!continueRecover ? ' disabled' : ''}`} 
-                block 
-                onClick={handleRecover} 
-                disabled={!continueRecover} 
-                loading={loading}
-                icon={<UndoOutlined />}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
+          <div className="rw-footer">
+            <button
+              type="button"
+              className="rw-primary-btn"
+              onClick={handleRecover}
+              disabled={!continueRecover || loading}
+            >
+              {loading ? (
+                <LoadingOutlined style={{ fontSize: 16 }} spin />
+              ) : (
+                <UndoOutlined style={{ fontSize: 14 }} />
+              )}
+              <span>{loading ? 'Recovering…' : RECOVER_WALLET}</span>
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="rw-success-chip">
+            <CheckCircleFilled
+              style={{ color: '#22C55E', fontSize: 18, flexShrink: 0 }}
+            />
+            <span className="rw-success-text">
+              Wallet recovered. Verify the details below before continuing.
+            </span>
+          </div>
+
+          <div className="rw-key-section">
+            <div className="rw-key-row">
+              <div className="rw-key-label">Public Wallet Address</div>
+              <button
+                type="button"
+                className="rw-key-btn"
+                onClick={() => setIsAddressModalOpen(true)}
+                disabled={!walletAddress}
               >
-                {RECOVER_WALLET}
-              </Button>
-            ) : (
-              <>
-                {walletAddress && (
-                  <div>
-                    <div className='mt-3'>
-                      <WalletAddressCopy address={walletAddress} topic={WALLET_ADDRESS} buttonText={SHOW_WALLET_ADDRESS} />
-                    </div>
-                  </div>
-                )}
-                {privateKey && (
-                  <div className='mt-3'>
-                    <WalletAddressCopy address={privateKey} topic={WALLET_PRIVATE_KEY} />
-                  </div>
-                )}
-                <Button 
-                  className="primary-button mt-5" 
-                  block 
-                  onClick={handleContinue}
-                  icon={<ArrowRightOutlined />}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  {CONTINUE}
-                </Button>
-              </>
-            )
-          }
+                <EyeOutlined style={{ fontSize: 14 }} />
+                <span>Show Wallet Address</span>
+              </button>
+            </div>
+
+            <div className="rw-key-row">
+              <div className="rw-key-label">Private Wallet Key</div>
+              <button
+                type="button"
+                className="rw-key-btn rw-key-btn-danger"
+                onClick={() => setIsPrivateKeyModalOpen(true)}
+                disabled={!privateKey}
+              >
+                <EyeOutlined style={{ fontSize: 14 }} />
+                <span>Show Private Key</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="rw-footer">
+            <button
+              type="button"
+              className="rw-primary-btn"
+              onClick={handleContinue}
+            >
+              <span>{CONTINUE}</span>
+              <ArrowRightOutlined style={{ fontSize: 14 }} />
+            </button>
+          </div>
+        </>
+      )}
+
+      <Modal
+        open={isAddressModalOpen}
+        onCancel={() => setIsAddressModalOpen(false)}
+        footer={null}
+        title="Wallet Address"
+        centered
+      >
+        <div className="rw-modal">
+          <div className="rw-modal-hint">
+            This is your public wallet address. Safe to share with anyone.
+          </div>
+          <CopyToClipboard text={walletAddress || ''} onCopy={handleCopyAddress}>
+            <button type="button" className="rw-modal-value">
+              <span className="rw-modal-value-text">{walletAddress}</span>
+              {isAddressCopied ? <CheckOutlined /> : <CopyOutlined />}
+            </button>
+          </CopyToClipboard>
         </div>
-      </div>
+      </Modal>
+
+      <Modal
+        open={isPrivateKeyModalOpen}
+        onCancel={() => setIsPrivateKeyModalOpen(false)}
+        footer={null}
+        title="Private Key"
+        centered
+      >
+        <div className="rw-modal">
+          <div className="rw-modal-warning">
+            <WarningFilled
+              style={{ color: '#EF4444', fontSize: 14, flexShrink: 0 }}
+            />
+            <span>
+              Anyone with this key has full access to your wallet. Never share
+              it.
+            </span>
+          </div>
+          <CopyToClipboard
+            text={privateKey || ''}
+            onCopy={handleCopyPrivateKey}
+          >
+            <button type="button" className="rw-modal-value">
+              <span className="rw-modal-value-text">{privateKey}</span>
+              {isPrivateKeyCopied ? <CheckOutlined /> : <CopyOutlined />}
+            </button>
+          </CopyToClipboard>
+        </div>
+      </Modal>
     </div>
   );
 }
