@@ -9,6 +9,7 @@
 
 :root {
   --orange-primary: #ff7300;
+  --safe-area-bottom: 8px;
 }
 
 .App {
@@ -201,6 +202,13 @@
   right: 0;
   top: 0;
   bottom: 0;
+  background: #FAFAF9;
+}
+
+.main-layout.ant-layout,
+.site-layout.ant-layout,
+.layout-content.ant-layout-content {
+  background: #FAFAF9;
 }
 
 .layout-content {
@@ -213,7 +221,7 @@
 }
 
 .layout-content.has-footer {
-  margin-bottom: 75px;
+  margin-bottom: calc(52px + var(--safe-area-bottom, 8px));
   padding-bottom: 0;
 }
 
@@ -237,15 +245,6 @@
   z-index: 1000;
 }
 
-@media (max-width: 768px) {
-  .footer-wrapper {
-    position: fixed;
-    bottom: 10px;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-  }
-}
 
 /* .footer-bar {
   width: 100%;

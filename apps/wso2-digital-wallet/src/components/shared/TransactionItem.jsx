@@ -14,54 +14,40 @@ import { WSO2_TOKEN } from '../../constants/strings';
 import { formatWalletAddress, copyToClipboard } from '../../utils/transactionUtils';
 
 const TransactionItem = ({ transaction, index }) => {
-  const addressToCopy = transaction.direction === "send" ? transaction.to : transaction.from;
+  const isSend = transaction.direction === "send";
+  const addressToCopy = isSend ? transaction.to : transaction.from;
 
   return (
-    <div 
-      key={index} 
-      className="transaction-item mt-4" 
+    <div
+      key={index}
+      className="transaction-item"
       onClick={() => copyToClipboard(addressToCopy, transaction.direction)}
-      style={{ cursor: 'pointer' }}
     >
-      <div className="d-flex justify-content-between w-100">
-        <div className="d-flex align-items-center">
-          <div className="d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px', flexShrink: 0 }}>
-            {transaction.direction === "send" ? (
-              <ArrowUpOutlined
-                className="red-text"
-                style={{ fontSize: 24 }}
-              />
-            ) : (
-              <ArrowDownOutlined
-                className="green-text"
-                style={{ fontSize: 24 }}
-              />
-            )}
-          </div>
-          <div className="d-flex flex-column mx-3 text-start">
-            <span className="recent-activity-topic fw-normal">
-              {transaction.direction === "send" ? "Sent" : "Received"}
-            </span>
-            <span className="recent-activity-address text-muted">
-              {transaction.direction === "send" 
-                ? `${formatWalletAddress(transaction.to)}`
-                : `${formatWalletAddress(transaction.from)}`
-              }
-            </span>
-            <span className="recent-activity-time">
-              {transaction.timestamp}
-            </span>
-          </div>
-        </div>
-        <span
-          className={`recent-activity-value ${
-            transaction.direction === "send" ? "red-text" : "green-text"
-          }`}
-        >
-          {transaction.direction === "send" ? "-" : "+"}
-          {transaction.value} {WSO2_TOKEN}
+      <div className={`tx-icon ${isSend ? 'sent' : 'received'}`}>
+        {isSend ? (
+          <ArrowUpOutlined style={{ fontSize: 18 }} />
+        ) : (
+          <ArrowDownOutlined style={{ fontSize: 18 }} />
+        )}
+      </div>
+
+      <div className="d-flex flex-column text-start" style={{ flex: 1, minWidth: 0 }}>
+        <span className="recent-activity-topic">
+          {isSend ? "Sent" : "Received"}
+        </span>
+        <span className="recent-activity-address">
+          {formatWalletAddress(isSend ? transaction.to : transaction.from)}
+        </span>
+        <span className="recent-activity-time">
+          {transaction.timestamp}
         </span>
       </div>
+
+      <span className={`recent-activity-value ${isSend ? 'red-text' : 'green-text'}`}>
+        {isSend ? "-" : "+"}
+        {transaction.value}
+        <span className="recent-activity-ticker">{WSO2_TOKEN}</span>
+      </span>
     </div>
   );
 };

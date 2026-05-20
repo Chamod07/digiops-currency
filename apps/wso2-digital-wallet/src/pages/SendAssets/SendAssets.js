@@ -7,18 +7,23 @@
 
 import React, { useEffect, useState } from "react";
 import { Input, Button, Avatar, message, Spin } from "antd";
-import { SearchOutlined, QrcodeOutlined, ArrowRightOutlined, HomeOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  QrcodeOutlined,
+  ArrowRightOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "./SendAssets.css";
 import { isAddress } from "ethereum-address";
-import Wso2MainImg from "../../assets/images/wso2_main.png";
+import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import {
   ERROR_FETCHING_LOCAL_TX_DETAILS,
   ERROR_RESETTING_TX_VALUES,
   ERROR_SAVING_TX_DETAILS,
   ERROR_RETRIEVE_WALLET_ADDRESS,
   ERROR_BRIDGE_NOT_READY,
-  WSO2_TOKEN
+  WSO2_TOKEN,
 } from "../../constants/strings";
 import { getLocalDataAsync, saveLocalDataAsync } from "../../helpers/storage";
 import { STORAGE_KEYS, DEFAULT_WALLET_ADDRESS } from "../../constants/configs";
@@ -52,7 +57,7 @@ function SendAssets() {
 
   const fetchWalletAddress = async (retryCount = 0) => {
     const maxRetries = 3;
-    
+
     try {
       const isBridgeReady = await waitForBridge();
       if (!isBridgeReady) {
@@ -61,13 +66,15 @@ function SendAssets() {
         return;
       }
       const walletAddressResponse = await getLocalDataAsync(
-        STORAGE_KEYS.WALLET_ADDRESS
+        STORAGE_KEYS.WALLET_ADDRESS,
       );
-      if (walletAddressResponse && 
-          walletAddressResponse !== null && 
-          walletAddressResponse !== DEFAULT_WALLET_ADDRESS && 
-          typeof walletAddressResponse === 'string' && 
-          walletAddressResponse.length > 2) {
+      if (
+        walletAddressResponse &&
+        walletAddressResponse !== null &&
+        walletAddressResponse !== DEFAULT_WALLET_ADDRESS &&
+        typeof walletAddressResponse === "string" &&
+        walletAddressResponse.length > 2
+      ) {
         setWalletAddress(walletAddressResponse);
       } else {
         if (retryCount < maxRetries) {
@@ -132,16 +139,19 @@ function SendAssets() {
       try {
         await saveLocalDataAsync(
           STORAGE_KEYS.SENDER_WALLET_ADDRESS,
-          launchData.walletAddress
+          launchData.walletAddress,
         );
-        await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, launchData.amount);
+        await saveLocalDataAsync(
+          STORAGE_KEYS.SENDING_AMOUNT,
+          launchData.amount,
+        );
         navigate("/confirm-assets-send", {
           replace: true,
           state: {
             isParkingPaymentFlow: true,
             returnAppId: launchData.returnAppId,
-            returnRoute: launchData.returnRoute
-          }
+            returnRoute: launchData.returnRoute,
+          },
         });
       } catch (error) {
         console.log(`${ERROR_SAVING_TX_DETAILS}: ${error}`);
@@ -167,7 +177,7 @@ function SendAssets() {
       await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, sendAmount);
       await saveLocalDataAsync(
         STORAGE_KEYS.SENDER_WALLET_ADDRESS,
-        sendWalletAddress
+        sendWalletAddress,
       );
       navigate("/confirm-assets-send");
     } catch (error) {
@@ -191,14 +201,17 @@ function SendAssets() {
         try {
           // Try parsing as JSON
           const parsedData = JSON.parse(qrData);
-          
+
           // Validate wallet address
-          if (!parsedData.wallet_address || !isAddress(parsedData.wallet_address)) {
+          if (
+            !parsedData.wallet_address ||
+            !isAddress(parsedData.wallet_address)
+          ) {
             messageApi.error("Invalid wallet address in QR code");
             setIsScanning(false);
             return;
           }
-          
+
           // Check if it's a payment request (has coin_amount)
           if (parsedData.coin_amount) {
             // Payment Request QR - Navigate directly to confirm
@@ -208,12 +221,18 @@ function SendAssets() {
               setIsScanning(false);
               return;
             }
-            
+
             // Save to localStorage and navigate to confirm page
-            await saveLocalDataAsync(STORAGE_KEYS.SENDER_WALLET_ADDRESS, parsedData.wallet_address);
-            await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, parsedData.coin_amount);
+            await saveLocalDataAsync(
+              STORAGE_KEYS.SENDER_WALLET_ADDRESS,
+              parsedData.wallet_address,
+            );
+            await saveLocalDataAsync(
+              STORAGE_KEYS.SENDING_AMOUNT,
+              parsedData.coin_amount,
+            );
             messageApi.success("Payment request loaded");
-            
+
             // Navigate directly to confirmation
             setTimeout(() => {
               navigate("/confirm-assets-send");
@@ -239,17 +258,17 @@ function SendAssets() {
         console.error("QR Code scan failed:", error);
         messageApi.error("Failed to scan QR code. Please try again.");
         setIsScanning(false);
-      }
+      },
     );
   };
 
   const fetchLocalTxDetails = async () => {
     try {
       const sendingAmount = await getLocalDataAsync(
-        STORAGE_KEYS.SENDING_AMOUNT
+        STORAGE_KEYS.SENDING_AMOUNT,
       );
       const senderWalletAddress = await getLocalDataAsync(
-        STORAGE_KEYS.SENDER_WALLET_ADDRESS
+        STORAGE_KEYS.SENDER_WALLET_ADDRESS,
       );
       setStoredSendWalletAddress(senderWalletAddress);
       setStoredSendAmount(sendingAmount);
@@ -347,11 +366,7 @@ function SendAssets() {
               <span className="asset-name">{WSO2_TOKEN}</span>
               <span className="asset-balance">
                 Balance:{" "}
-                {isTokenBalanceLoading ? (
-                  <Spin size="small" />
-                ) : (
-                  tokenBalance
-                )}{" "}
+                {isTokenBalanceLoading ? <Spin size="small" /> : tokenBalance}{" "}
                 {WSO2_TOKEN}
               </span>
             </div>
@@ -379,7 +394,9 @@ function SendAssets() {
             </div>
           </div>
           {!isValidWalletAddress && (
-            <span className="helper-text">Enter a valid wallet address first</span>
+            <span className="helper-text">
+              Enter a valid wallet address first
+            </span>
           )}
         </div>
 

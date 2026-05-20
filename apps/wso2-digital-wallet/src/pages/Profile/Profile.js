@@ -13,69 +13,75 @@ import {
 } from 'react';
 
 import {
-  Avatar,
   Button,
+  Modal,
   Spin,
-  Tag,
-  Tooltip,
 } from 'antd';
-import { SHA256 } from 'crypto-js';
-import Identicon from 'identicon.js';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useNavigate } from 'react-router-dom';
 
 import {
   CheckOutlined,
   CopyOutlined,
+  EyeOutlined,
   LoadingOutlined,
-  QrcodeOutlined,
   LogoutOutlined,
+  QrcodeOutlined,
+  RightOutlined,
 } from '@ant-design/icons';
+import { QRCodeSVG } from 'qrcode.react';
 
-import WalletAddressCopy from '../../components/Home/WalletAddressCopy';
 import { COLORS } from '../../constants/colors';
 import { STORAGE_KEYS } from '../../constants/configs';
 import {
+  ERROR,
   ERROR_READING_WALLET_DETAILS,
   ERROR_WHEN_LOGGING_OUT,
   LOGOUT,
-  SUCCESS,
-  ERROR,
   OK,
+  SHOW_WALLET_ADDRESS,
+  SUCCESS,
   WALLET_ADDRESS_COPIED,
   WALLET_PRIVATE_KEY,
-  SHOW_WALLET_ADDRESS
 } from '../../constants/strings';
 import { showToast, showAlertBox } from '../../helpers/alerts';
 import {
   getLocalDataAsync,
   saveLocalDataAsync,
 } from '../../helpers/storage';
-import { getUserWalletAddresses, setWalletAsPrimary } from '../../services/wallet.service';
-import { Modal } from 'antd';
-import { QRCodeSVG } from 'qrcode.react';
+import {
+  getUserWalletAddresses,
+  setWalletAsPrimary,
+} from '../../services/wallet.service';
+
+const formatWalletAddress = (addr) => {
+  if (!addr) return '';
+  if (addr.length <= 24) return addr;
+  return `${addr.slice(0, 12)}...${addr.slice(-10)}`;
+};
 
 function Profile() {
   const navigate = useNavigate();
 
-  const [isAccountCopied, setIsAccountCopied] = useState(false);
-  const [walletAddress, setWalletAddress] = useState("");
-  const [walletPrivateKey, setWalletPrivateKey] = useState("");
+  const [walletAddress, setWalletAddress] = useState('');
+  const [walletPrivateKey, setWalletPrivateKey] = useState('');
   const [userWallets, setUserWallets] = useState([]);
   const [isLoadingWallets, setIsLoadingWallets] = useState(true);
+
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isSettingPrimary, setIsSettingPrimary] = useState(false);
+
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [isPrivateKeyModalOpen, setIsPrivateKeyModalOpen] = useState(false);
+
+  const [isAddressCopied, setIsAddressCopied] = useState(false);
+  const [isPrivateKeyCopied, setIsPrivateKeyCopied] = useState(false);
 
   const fetchWalletDetails = async () => {
     try {
-      const walletAddressResponse = await getLocalDataAsync(
-        STORAGE_KEYS.WALLET_ADDRESS
-      );
-      const privateKeyResponse = await getLocalDataAsync(
-        STORAGE_KEYS.PRIVATE_KEY
-      );
+      const walletAddressResponse = await getLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS);
+      const privateKeyResponse = await getLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY);
       setWalletAddress(walletAddressResponse);
       setWalletPrivateKey(privateKeyResponse);
     } catch (error) {
@@ -99,44 +105,34 @@ function Profile() {
 
   useEffect(() => {
     fetchWalletDetails();
-   
     fetchUserWallets();
   }, []);
 
-  const generateAvatar = (seed) => {
-    const options = {
-      size: 80
-    };
-    const hash = SHA256(seed).toString();
-    const data = new Identicon(hash.slice(0, 15), options).toString();
-    return "data:image/png;base64," + data;
+  const handleCopyAddress = () => {
+    showToast(SUCCESS, WALLET_ADDRESS_COPIED);
+    setIsAddressCopied(true);
+    setTimeout(() => setIsAddressCopied(false), 2000);
   };
 
-  const avatarUrl = generateAvatar(walletAddress || "default");
-
-  const handleCopyAccount = async () => {
-    showToast(SUCCESS, WALLET_ADDRESS_COPIED);
-    setIsAccountCopied(true);
-    setTimeout(() => {
-      setIsAccountCopied(false);
-    }, 2000);
+  const handleCopyPrivateKey = () => {
+    showToast(SUCCESS, `${WALLET_PRIVATE_KEY} copied!`);
+    setIsPrivateKeyCopied(true);
+    setTimeout(() => setIsPrivateKeyCopied(false), 2000);
   };
 
   const handleSetAsPrimary = async () => {
     if (!selectedWallet || selectedWallet.defaultWallet) return;
-    
+
     setIsSettingPrimary(true);
     try {
       await setWalletAsPrimary(selectedWallet.walletAddress);
-      showToast(SUCCESS, "Successfully set as primary wallet");
-      
+      showToast(SUCCESS, 'Successfully set as primary wallet');
       await fetchUserWallets();
-      
       setIsWalletModalOpen(false);
       setSelectedWallet(null);
     } catch (error) {
-      console.error("Error setting wallet as primary:", error);
-      showAlertBox(ERROR, "Failed to set wallet as primary", OK);
+      console.error('Error setting wallet as primary:', error);
+      showAlertBox(ERROR, 'Failed to set wallet as primary', OK);
     } finally {
       setIsSettingPrimary(false);
     }
@@ -144,54 +140,52 @@ function Profile() {
 
   const handleLogout = async () => {
     try {
-      await saveLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS, "");
-      await saveLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY, "");
+      await saveLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS, '');
+      await saveLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY, '');
     } catch (error) {
       console.log(`${ERROR_WHEN_LOGGING_OUT} - ${error}`);
     }
-    navigate("/create-wallet");
+    navigate('/create-wallet');
   };
 
   return (
-    <div className="mx-4 wallet-details">
+    <div className="profile-page">
       {/* Wallet Details Modal */}
       <Modal
         open={isWalletModalOpen}
         onCancel={() => setIsWalletModalOpen(false)}
         footer={null}
         title="Wallet Details"
+        centered
       >
         {selectedWallet && (
           <div>
-            <div style={{ marginTop: '15px', fontWeight: 600, wordBreak: 'break-all', marginBottom: '8px', fontSize: '0.85rem' }}>
-              {selectedWallet.walletAddress}
+            <div className="profile-modal-address">{selectedWallet.walletAddress}</div>
+            <div className="profile-modal-meta">
+              Created on {new Date(selectedWallet.createdOn).toLocaleString()}
             </div>
-            <div style={{ fontSize: '12px', color: COLORS.GRAY_LIGHT, marginBottom: '12px' }}>
-              Created on: {new Date(selectedWallet.createdOn).toLocaleString()}
-            </div>
-            <div style={{ marginBottom: '12px' }}>
-              {selectedWallet.defaultWallet ? (
-                <Tag color="green">Primary Wallet</Tag>
-              ) : (
-                <div></div>
-              )}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-              <Button
-                type="primary"
-                disabled={selectedWallet.defaultWallet || isSettingPrimary}
-                loading={isSettingPrimary}
-                onClick={handleSetAsPrimary}
-                style={{
-                  minWidth: '160px',
-                  backgroundColor: selectedWallet.defaultWallet ? COLORS.GRAY_LIGHT : COLORS.ORANGE_PRIMARY,
-                  color: selectedWallet.defaultWallet ? COLORS.GRAY_DARK : COLORS.WHITE,
-                  border: selectedWallet.defaultWallet ? `1px solid ${COLORS.GRAY_LIGHT}` : undefined
-                }}
-              >
-                {selectedWallet.defaultWallet ? "Primary Wallet" : "Set as Primary"}
-              </Button>
-            </div>
+            {selectedWallet.defaultWallet && (
+              <div className="profile-modal-tag-row">
+                <span className="profile-primary-tag">Primary</span>
+              </div>
+            )}
+            {!selectedWallet.defaultWallet && (
+              <div className="profile-modal-action">
+                <Button
+                  type="primary"
+                  disabled={isSettingPrimary}
+                  loading={isSettingPrimary}
+                  onClick={handleSetAsPrimary}
+                  style={{
+                    minWidth: '160px',
+                    backgroundColor: COLORS.ORANGE_PRIMARY,
+                    color: COLORS.WHITE,
+                  }}
+                >
+                  Set as Primary
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Modal>
@@ -204,127 +198,129 @@ function Profile() {
         title="Wallet QR Code"
         centered
       >
-        <div style={{ textAlign: 'center', padding: '20px' }}>
-          <div style={{ marginBottom: '16px', fontSize: '14px', color: COLORS.GRAY_MEDIUM, fontWeight: '500' }}>
-            Share this QR code to receive coins
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+        <div className="profile-qr-modal">
+          <div className="profile-qr-subtitle">Share this QR code to receive coins</div>
+          <div className="profile-qr-canvas">
             <QRCodeSVG
-              value={JSON.stringify({
-                wallet_address: walletAddress
-              })}
+              value={JSON.stringify({ wallet_address: walletAddress })}
               size={200}
               level="M"
             />
           </div>
-        <div className="d-flex justify-content-center">
-          <CopyToClipboard text={walletAddress} onCopy={handleCopyAccount}>
-            <Tooltip title={isAccountCopied ? "Copied" : "Copy to Clipboard"}>
-              <Tag className="total-balance-wallet-address mt-2 d-flex">
-                {walletAddress}
-                <div>
-                  {!isAccountCopied ? (
-                    <div>
-                      <CopyOutlined style={{ marginLeft: "5px" }} />
-                    </div>
-                  ) : (
-                    <CheckOutlined style={{ marginLeft: "5px" }} />
-                  )}
-                </div>
-              </Tag>
-            </Tooltip>
+          <CopyToClipboard text={walletAddress} onCopy={handleCopyAddress}>
+            <button className="profile-qr-address" type="button">
+              <span className="profile-qr-address-text">{walletAddress}</span>
+              {isAddressCopied ? <CheckOutlined /> : <CopyOutlined />}
+            </button>
           </CopyToClipboard>
-        </div>
         </div>
       </Modal>
 
-      <div className="profile-header">
-        <h4>Profile</h4>
-      </div>
-      {/* <div className="d-flex justify-content-center mt-4">
-        <Avatar size={80} src={avatarUrl} />
-      </div> */}
-      <div className="mt-4">
-        <div className="profile-title">Public Wallet Address</div>
-        <div className="d-flex justify-content-center mt-2">
-          <Button
-            className="secondary-button"
-            icon={<QrcodeOutlined />}
-            onClick={() => setIsQrModalOpen(true)}
-            style={{
-              borderRadius: '6px',
-              fontSize: '15px',
-              fontWeight: '500',
-              padding: '0 24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              minWidth: '180px'
-            }}
-          >
-            {SHOW_WALLET_ADDRESS}
-          </Button>
+      {/* Private Key Modal */}
+      <Modal
+        open={isPrivateKeyModalOpen}
+        onCancel={() => setIsPrivateKeyModalOpen(false)}
+        footer={null}
+        title="Private Key"
+        centered
+      >
+        <div className="profile-pk-modal">
+          <div className="profile-pk-warning">
+            Anyone with this key has full access to your wallet. Never share it.
+          </div>
+          <CopyToClipboard text={walletPrivateKey || ''} onCopy={handleCopyPrivateKey}>
+            <button className="profile-pk-value" type="button">
+              <span className="profile-pk-value-text">{walletPrivateKey}</span>
+              {isPrivateKeyCopied ? <CheckOutlined /> : <CopyOutlined />}
+            </button>
+          </CopyToClipboard>
         </div>
-      </div>
-      <div className="mt-4">
-        <WalletAddressCopy
-          address={walletPrivateKey}
-          topic={WALLET_PRIVATE_KEY}
-        />
-      </div>
-      {/* User Wallets Section */}
-      <div className="mt-4 mb-5">
-        <div className="wallet-list-title">My Wallets</div>
+      </Modal>
+
+      <div className="profile-section">
+        <h2 className="profile-title">Profile</h2>
+
+        <div className="profile-group-label">Wallet Keys</div>
+        <div className="profile-card">
+          <button
+            type="button"
+            className="profile-btn"
+            onClick={() => setIsQrModalOpen(true)}
+          >
+            <span className="profile-btn-icon neutral">
+              <QrcodeOutlined style={{ fontSize: 18, color: '#1C1917' }} />
+            </span>
+            <span className="profile-btn-text">
+              <span className="profile-btn-label">{SHOW_WALLET_ADDRESS}</span>
+              <span className="profile-btn-sub">View your public QR code</span>
+            </span>
+            <RightOutlined className="profile-btn-chevron" />
+          </button>
+
+          <button
+            type="button"
+            className="profile-btn"
+            onClick={() => setIsPrivateKeyModalOpen(true)}
+          >
+            <span className="profile-btn-icon warning">
+              <EyeOutlined style={{ fontSize: 18, color: COLORS.ORANGE_PRIMARY }} />
+            </span>
+            <span className="profile-btn-text">
+              <span className="profile-btn-label warning">Show Private Key</span>
+              <span className="profile-btn-sub">Keep this secret at all times</span>
+            </span>
+            <RightOutlined className="profile-btn-chevron" />
+          </button>
+        </div>
+
+        <div className="profile-group-label">My Wallets</div>
         {isLoadingWallets ? (
-          <div className="mt-2 d-flex justify-content-center">
+          <div className="profile-wallets-loading">
             <Spin
-              indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY }} />}
-              style={{ margin: "10px" }}
+              indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY }} spin />}
             />
           </div>
         ) : userWallets.length === 0 ? (
-          <div className="mt-2 text-muted">No wallets found.</div>
+          <div className="profile-wallets-empty">No wallets found.</div>
         ) : (
-          <div className="wallet-list mt-2">
+          <div className="profile-wallets">
             {userWallets.map((wallet, idx) => (
-                <div key={wallet.walletAddress + idx} className="wallet-list-item mb-3 p-3" style={{ border: `1px solid ${COLORS.BORDER_LIGHT}`, borderRadius: '8px', position: 'relative', cursor: 'pointer' }}
-                  onClick={() => { setSelectedWallet(wallet); setIsWalletModalOpen(true); }}>
-                
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span className="wallet-address" style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>
-                    {wallet.walletAddress.slice(0, 12)}...{wallet.walletAddress.slice(-12)}
+              <button
+                key={wallet.walletAddress + idx}
+                type="button"
+                className="profile-wallet-card"
+                onClick={() => {
+                  setSelectedWallet(wallet);
+                  setIsWalletModalOpen(true);
+                }}
+              >
+                <span className="profile-wallet-info">
+                  <span className="profile-wallet-addr">
+                    {formatWalletAddress(wallet.walletAddress)}
                   </span>
-                  {wallet.defaultWallet && (
-                    <Tag color="green" style={{ marginLeft: '8px', fontSize: '11px' }}>Primary</Tag>
-                  )}
-                </div>
-
-                <div className="wallet-created-on" style={{ fontSize: '11px', color: COLORS.GRAY_MEDIUM, marginTop: '4px', textAlign: 'left' }}>
-                  Created on: {new Date(wallet.createdOn).toLocaleString()}
-                </div>
-              </div>
+                  <span className="profile-wallet-date">
+                    Created {new Date(wallet.createdOn).toLocaleDateString()}
+                  </span>
+                </span>
+                {wallet.defaultWallet && (
+                  <span className="profile-primary-tag">Primary</span>
+                )}
+              </button>
             ))}
           </div>
         )}
-      </div>
-      <div className="logout-button">
-        <div className="d-flex justify-content-center">
-          <Button 
-            className="default-button" 
-            onClick={handleLogout}
-            icon={<LogoutOutlined />}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              minWidth: '140px',
-              padding: '0 24px'
-            }}
-          >
-            {LOGOUT}
-          </Button>
+
+        <div className="profile-logout">
+          <div className="profile-card">
+            <button type="button" className="profile-btn" onClick={handleLogout}>
+              <span className="profile-btn-icon danger">
+                <LogoutOutlined style={{ fontSize: 18, color: '#EF4444' }} />
+              </span>
+              <span className="profile-btn-text">
+                <span className="profile-btn-label danger">{LOGOUT}</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

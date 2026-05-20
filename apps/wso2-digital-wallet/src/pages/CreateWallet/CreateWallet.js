@@ -9,7 +9,7 @@ import { Avatar, Button } from "antd";
 import { useEffect, useState } from "react";
 import { PlusOutlined, UndoOutlined } from "@ant-design/icons";
 import "./CreateWallet.css";
-import Wso2MainImg from "../../assets/images/wso2_main.png";
+import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import { ethers } from "ethers";
 import WalletPhrase from "../WalletPhrase/WalletPhrase";
 import { useNavigate } from "react-router-dom";
@@ -58,9 +58,15 @@ function CreateWallet() {
       if (wallet.address) {
         updateUserWalletAddress(wallet.address)
           .then(async () => {
-            await saveLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS, wallet.address);
-            await saveLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY, wallet.privateKey);
-            
+            await saveLocalDataAsync(
+              STORAGE_KEYS.WALLET_ADDRESS,
+              wallet.address,
+            );
+            await saveLocalDataAsync(
+              STORAGE_KEYS.PRIVATE_KEY,
+              wallet.privateKey,
+            );
+
             setWalletPhrase(wallet.mnemonic.phrase);
             showToast(SUCCESS, SUCCESS_WALLET_CREATED);
 
@@ -103,10 +109,10 @@ function CreateWallet() {
                 loading={walletCreateLoading}
                 icon={<PlusOutlined />}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
                 }}
               >
                 {CREATE_A_NEW_WALLET}
@@ -115,11 +121,11 @@ function CreateWallet() {
                 onClick={handleRestoreWallet}
                 className="wallet-create-restore-wallet mt-4"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  cursor: 'pointer'
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  cursor: "pointer",
                 }}
               >
                 <UndoOutlined />

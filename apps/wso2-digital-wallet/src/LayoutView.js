@@ -28,6 +28,7 @@ function LayoutView() {
 
   useEffect(() => {
     if (
+      location.pathname === "/" ||
       location.pathname === "/create-wallet" ||
       location.pathname === "/wallet-phrase" ||
       location.pathname === "/recover-wallet" ||

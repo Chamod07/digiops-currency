@@ -14,7 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "./ReceiveCoins.css";
-import Wso2MainImg from "../../assets/images/wso2_main.png";
+import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import { QRCodeSVG } from "qrcode.react";
 import {
   ERROR_RETRIEVE_WALLET_ADDRESS,
@@ -131,7 +131,7 @@ function ReceiveCoins() {
                 `receive-${receiveAmount}-${WSO2_TOKEN}.png`,
                 { type: "image/png" },
               );
-              
+
               const shareData = {
                 files: [file],
               };
@@ -208,12 +208,8 @@ function ReceiveCoins() {
           </div>
 
           <div className="wallet-address-container">
-            <div className="wallet-address-label">
-              Wallet Address
-            </div>
-            <div className="wallet-address-display">
-              {walletAddress}
-            </div>
+            <div className="wallet-address-label">Wallet Address</div>
+            <div className="wallet-address-display">{walletAddress}</div>
             <div className="wallet-address-helper">
               You will receive coins to this wallet
             </div>
