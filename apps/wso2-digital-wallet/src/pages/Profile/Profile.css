@@ -32,7 +32,7 @@
 .profile-group-label {
   font-size: 11px;
   font-weight: 600;
-  color: #B8AFA8;
+  color: #78716C;
   letter-spacing: 1.1px;
   text-transform: uppercase;
   margin: 22px 0 10px;
@@ -129,7 +129,7 @@
 }
 
 .profile-btn-chevron {
-  color: #C4B9AC;
+  color: #9CA3AF;
   font-size: 13px;
   flex-shrink: 0;
 }
@@ -185,7 +185,7 @@
 
 .profile-wallet-date {
   font-size: 11px;
-  color: #B8AFA8;
+  color: #78716C;
 }
 
 .profile-primary-tag {
@@ -345,4 +345,96 @@
   text-align: left;
   flex: 1;
   min-width: 0;
+}
+
+.profile-logout-modal {
+  padding: 4px 0;
+}
+
+.profile-logout-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #FEF2F2;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.profile-logout-warning-text {
+  font-size: 13px;
+  color: #991B1B;
+  line-height: 1.5;
+  font-weight: 500;
+  text-align: left;
+}
+
+.profile-logout-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-logout-cancel {
+  flex: 1;
+  height: 48px;
+  background: #ffffff;
+  border: 1.5px solid #E5E0D8;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1C1917;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.profile-logout-cancel:focus {
+  outline: none;
+}
+
+.profile-logout-cancel:active:not(:disabled) {
+  background: #F0EDE8;
+  transform: scale(0.98);
+}
+
+.profile-logout-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-logout-confirm {
+  flex: 1.4;
+  height: 48px;
+  background: #EF4444;
+  border: none;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: -0.2px;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.profile-logout-confirm:focus {
+  outline: none;
+}
+
+.profile-logout-confirm:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.profile-logout-confirm:disabled {
+  background: #FCA5A5;
+  box-shadow: none;
+  cursor: not-allowed;
 }

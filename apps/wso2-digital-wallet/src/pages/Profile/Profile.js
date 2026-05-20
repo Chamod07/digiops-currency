@@ -28,6 +28,7 @@ import {
   LogoutOutlined,
   QrcodeOutlined,
   RightOutlined,
+  WarningFilled,
 } from '@ant-design/icons';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -74,6 +75,8 @@ function Profile() {
 
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isPrivateKeyModalOpen, setIsPrivateKeyModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [isAddressCopied, setIsAddressCopied] = useState(false);
   const [isPrivateKeyCopied, setIsPrivateKeyCopied] = useState(false);
@@ -115,7 +118,7 @@ function Profile() {
   };
 
   const handleCopyPrivateKey = () => {
-    showToast(SUCCESS, `${WALLET_PRIVATE_KEY} copied!`);
+    showToast(SUCCESS, `${WALLET_PRIVATE_KEY} copied`);
     setIsPrivateKeyCopied(true);
     setTimeout(() => setIsPrivateKeyCopied(false), 2000);
   };
@@ -126,25 +129,32 @@ function Profile() {
     setIsSettingPrimary(true);
     try {
       await setWalletAsPrimary(selectedWallet.walletAddress);
-      showToast(SUCCESS, 'Successfully set as primary wallet');
+      showToast(SUCCESS, 'Primary wallet updated');
       await fetchUserWallets();
       setIsWalletModalOpen(false);
       setSelectedWallet(null);
     } catch (error) {
       console.error('Error setting wallet as primary:', error);
-      showAlertBox(ERROR, 'Failed to set wallet as primary', OK);
+      showAlertBox(ERROR, "Couldn't set as primary wallet", OK);
     } finally {
       setIsSettingPrimary(false);
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await saveLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS, '');
       await saveLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY, '');
     } catch (error) {
       console.log(`${ERROR_WHEN_LOGGING_OUT} - ${error}`);
     }
+    setIsLoggingOut(false);
+    setIsLogoutModalOpen(false);
     navigate('/create-wallet');
   };
 
@@ -312,7 +322,7 @@ function Profile() {
 
         <div className="profile-logout">
           <div className="profile-card">
-            <button type="button" className="profile-btn" onClick={handleLogout}>
+            <button type="button" className="profile-btn" onClick={handleLogoutClick}>
               <span className="profile-btn-icon danger">
                 <LogoutOutlined style={{ fontSize: 18, color: '#EF4444' }} />
               </span>
@@ -323,6 +333,49 @@ function Profile() {
           </div>
         </div>
       </div>
+
+      <Modal
+        open={isLogoutModalOpen}
+        onCancel={() => !isLoggingOut && setIsLogoutModalOpen(false)}
+        footer={null}
+        title="Log out of your wallet?"
+        centered
+        maskClosable={!isLoggingOut}
+        closable={!isLoggingOut}
+      >
+        <div className="profile-logout-modal">
+          <div className="profile-logout-warning">
+            <WarningFilled style={{ color: '#EF4444', fontSize: 16, flexShrink: 0 }} />
+            <span className="profile-logout-warning-text">
+              You'll need your 12-word recovery phrase to log back in. Without it,
+              your funds can't be restored.
+            </span>
+          </div>
+          <div className="profile-logout-actions">
+            <button
+              type="button"
+              className="profile-logout-cancel"
+              onClick={() => setIsLogoutModalOpen(false)}
+              disabled={isLoggingOut}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="profile-logout-confirm"
+              onClick={handleConfirmLogout}
+              disabled={isLoggingOut}
+            >
+              {isLoggingOut ? (
+                <LoadingOutlined style={{ fontSize: 14 }} spin />
+              ) : (
+                <LogoutOutlined style={{ fontSize: 14 }} />
+              )}
+              <span>{isLoggingOut ? 'Logging out…' : LOGOUT}</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
