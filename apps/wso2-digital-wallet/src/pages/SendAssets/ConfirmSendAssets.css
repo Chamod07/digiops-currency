@@ -1,4 +1,4 @@
-/* 
+/*
 // Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 //
 // This software is the property of WSO2 LLC. and its suppliers, if any.
@@ -7,173 +7,295 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 */
 
-.confirm-send-container {
-  padding: 0 16px;
-  min-height: calc(100vh - 150px);
-  padding-bottom: 100px;
+/* ── REVIEW TRANSACTION (CONFIRM SEND) PAGE ─────────────────────── */
+
+.confirm-page {
+  padding: 4px 0 24px;
 }
 
-.confirm-header-section {
+/* Breadcrumb (Home › Review Transaction) — normal flow only */
+.confirm-breadcrumb {
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-top: 16px;
-  margin-bottom: 0;
+  gap: 6px;
+  padding: 12px 24px 0;
 }
 
-.confirm-header {
-  font-size: 18px;
+.confirm-breadcrumb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--orange-primary, #ff7300);
+  padding: 0;
+  letter-spacing: -0.1px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.confirm-breadcrumb-btn:focus {
+  outline: none;
+}
+
+.confirm-breadcrumb-btn:active {
+  opacity: 0.7;
+}
+
+.confirm-breadcrumb-sep {
+  font-size: 13px;
+  color: #9CA3AF;
+  line-height: 1;
+}
+
+.confirm-breadcrumb-current {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9CA3AF;
+  letter-spacing: -0.1px;
+}
+
+/* Hero amount display */
+.confirm-hero {
   text-align: center;
+  padding: 28px 24px 24px;
 }
 
-/* Confirm Content */
-.confirm-content {
-  margin-top: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.confirm-hero-label {
+  font-size: 11px;
+  color: #9CA3AF;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
-/* Hero Amount Display */
-.amount-hero {
-  text-align: center;
-  margin-bottom: 32px;
-  padding: 0 20px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.amount-subtitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: #8c8c8c;
-  margin-top: 4px;
-}
-
-.amount-value {
-  font-size: 42px;
+.confirm-hero-amount {
+  font-size: 56px;
   font-weight: 700;
-  color: #1a1a1a;
-  line-height: 1.2;
-  margin-top: 4px;
+  color: #1C1917;
+  letter-spacing: -2.4px;
+  line-height: 1;
+  margin-bottom: 14px;
+  word-break: break-all;
 }
 
-.amount-currency {
-  font-size: 18px;
-  font-weight: 600;
-  color: #8c8c8c;
-  margin-top: 2px;
-}
-
-/* Transaction Flow - Horizontal Compact */
-.transaction-flow {
-  width: 100%;
-  display: flex;
+.confirm-hero-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e8e8e8;
+  gap: 7px;
+  background: #FFF7ED;
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  border-radius: 999px;
+  padding: 6px 14px 6px 8px;
 }
 
-.flow-item {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
+.confirm-hero-chip-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange-primary, #ff7300);
+  letter-spacing: 0.4px;
 }
 
-.flow-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
+/* From/To + Total card */
+.confirm-card {
+  margin: 0 24px 14px;
+  background: #ffffff;
+  border: 1.5px solid #E5E0D8;
+  border-radius: 20px;
   overflow: hidden;
 }
 
-.flow-label {
-  font-size: 12px;
-  color: #8c8c8c;
-  font-weight: 400;
+.confirm-from-to {
+  display: flex;
+  align-items: center;
+  padding: 18px 20px;
+  gap: 10px;
 }
 
-.flow-address {
-  font-size: 13px;
-  color: #1a1a1a;
+.confirm-addr-blk {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.confirm-addr-blk-right {
+  text-align: right;
+}
+
+.confirm-addr-lbl {
+  font-size: 11px;
+  color: #78716C;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.confirm-addr-val {
+  font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  color: #374151;
   font-weight: 500;
-  font-family: 'Courier New', monospace;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.flow-arrow {
+.confirm-arrow-sep {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F0EDE8;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: 0 4px;
 }
 
-/* Total Section */
-.total-section {
-  width: 100%;
+.confirm-total-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e8e8e8;
-  margin-bottom: 32px;
+  padding: 14px 20px;
+  border-top: 1px solid #F0EDE8;
+  gap: 10px;
 }
 
-.total-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.total-amount-container {
-  display: flex;
-  align-items: center;
-}
-
-.total-amount {
-  font-size: 18px;
+.confirm-total-lbl {
+  font-size: 14px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1C1917;
 }
 
-.total-amount-container .currency-badge {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 6px 12px !important;
-  background: #f1f1f1 !important;
-  border-radius: 8px !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  color: #212529 !important;
-  margin-left: 12px !important;
-}
-
-/* Button Group */
-.confirm-send-container .button-group {
+.confirm-total-val {
   display: flex;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 24px;
+  align-items: center;
+  gap: 8px;
 }
 
-.confirm-send-container .button-group .default-button,
-.confirm-send-container .button-group .primary-button {
+.confirm-total-num {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1C1917;
+  letter-spacing: -0.5px;
+  word-break: break-all;
+}
+
+.confirm-ticker-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFF7ED;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  flex-shrink: 0;
+}
+
+.confirm-ticker-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--orange-primary, #ff7300);
+  letter-spacing: 0.3px;
+}
+
+/* Warning chip */
+.confirm-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 24px 18px;
+  background: #FFF7ED;
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.confirm-warn-text {
+  font-size: 12px;
+  color: #92400E;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Cancel + Confirm actions */
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  padding: 0 24px;
+}
+
+.confirm-cancel-btn {
+  flex: 1;
+  height: 54px;
+  background: #ffffff;
+  border: 1.5px solid #E5E0D8;
+  border-radius: 18px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1C1917;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.confirm-cancel-btn:focus {
+  outline: none;
+}
+
+.confirm-cancel-btn:active:not(:disabled) {
+  background: #F0EDE8;
+  transform: scale(0.98);
+}
+
+.confirm-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.confirm-primary-btn {
+  flex: 1.6;
+  height: 54px;
+  background: var(--orange-primary, #ff7300);
+  border: none;
+  border-radius: 18px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: -0.2px;
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.28);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.confirm-primary-btn:focus {
+  outline: none;
+}
+
+.confirm-primary-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.confirm-primary-btn:disabled {
+  background: #E5E0D8;
+  color: #78716C;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Full-width confirm button — used in parking flow (no Cancel sibling) */
+.confirm-primary-btn-full {
   flex: 1;
 }
