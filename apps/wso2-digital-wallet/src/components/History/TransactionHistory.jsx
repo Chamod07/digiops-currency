@@ -6,8 +6,8 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { Spin, Button, Input, Pagination } from 'antd';
-import { LoadingOutlined, SearchOutlined } from '@ant-design/icons';
+import { Spin, Pagination } from 'antd';
+import { LoadingOutlined, SearchOutlined, CloseOutlined } from '@ant-design/icons';
 import { COLORS } from '../../constants/colors';
 
 import { useTransactionHistory } from '../../hooks/useTransactionHistory';
@@ -30,7 +30,8 @@ function TransactionHistory({ walletAddress }) {
     loading,
     error,
     refetch,
-    totalCount  } = useTransactionHistory({ walletAddress, pageSize: 15, filter, page });
+    totalCount,
+  } = useTransactionHistory({ walletAddress, pageSize: 15, filter, page });
 
   useEffect(() => {
     setPage(1);
@@ -59,36 +60,27 @@ function TransactionHistory({ walletAddress }) {
     setSearchTerm(e.target.value);
   }, []);
 
+  const handleClearSearch = useCallback(() => {
+    setSearchTerm('');
+    searchInputRef.current?.focus();
+  }, []);
+
   const sentCount = allTransactions.filter(tx => tx.direction === 'send').length;
   const receivedCount = allTransactions.filter(tx => tx.direction === 'receive').length;
   const allCount = allTransactions.length;
 
-  const FilterButtons = () => (
-    <div className="mb-3">
-      <div className="d-flex justify-content-between" style={{ gap: '8px' }}>
-        <Button onClick={() => setFilter('all')} size="large" className={`history-filter-button ${filter === 'all' ? 'active' : ''}`}>
-          <span>All</span>
-          <span className={`history-filter-count ${filter === 'all' ? 'active' : 'inactive'}`}>{allCount}</span>
-        </Button>
-        <Button onClick={() => setFilter('sent')} size="large" className={`history-filter-button ${filter === 'sent' ? 'active' : ''}`}>
-          <span>Sent</span>
-          <span className={`history-filter-count ${filter === 'sent' ? 'active' : 'inactive'}`}>{sentCount}</span>
-        </Button>
-        <Button onClick={() => setFilter('received')} size="large" className={`history-filter-button ${filter === 'received' ? 'active' : ''}`}>
-          <span>Received</span>
-          <span className={`history-filter-count ${filter === 'received' ? 'active' : 'inactive'}`}>{receivedCount}</span>
-        </Button>
-      </div>
-    </div>
-  );
-
+  const filters = [
+    { key: 'all', label: 'All', count: allCount },
+    { key: 'sent', label: 'Sent', count: sentCount },
+    { key: 'received', label: 'Received', count: receivedCount },
+  ];
 
   function TransactionList({ transactions }) {
     if (error) {
       return (
-        <div className="mt-5 text-center">
-          <p className="text-danger">Error loading transactions.</p>
-          <Button onClick={() => refetch()}>Retry</Button>
+        <div className="history-empty">
+          <p className="history-empty-text history-empty-text-danger">Error loading transactions.</p>
+          <button className="history-empty-action" onClick={() => refetch()}>Retry</button>
         </div>
       );
     }
@@ -96,65 +88,90 @@ function TransactionHistory({ walletAddress }) {
       return (
         <>
           {transactions.map((transaction, index) => (
-            <TransactionItem 
-              key={`${transaction.txHash}-${index}`} 
-              transaction={transaction} 
-              index={index} 
+            <TransactionItem
+              key={`${transaction.txHash}-${index}`}
+              transaction={transaction}
+              index={index}
             />
           ))}
           {searchTerm && (
-            <div className="mt-4 text-center text-muted">
+            <div className="history-filtered-note">
               Showing {filteredTransactions.length} of {transactions.length} filtered transactions
             </div>
           )}
         </>
       );
-    } else {
-      return (
-        <div className="mt-5 text-center">
-          <p className="text-muted">
-            {searchTerm ? 'No transactions match your search' : 'No transaction history found'}
-          </p>
-          {searchTerm && (
-            <Button size="medium" onClick={() => setSearchTerm('')}>Clear Search</Button>
-          )}
-        </div>
-      );
     }
+    return (
+      <div className="history-empty">
+        <p className="history-empty-text">
+          {searchTerm ? 'No transactions match your search' : 'No transaction history found'}
+        </p>
+        {searchTerm && (
+          <button className="history-empty-action" onClick={() => setSearchTerm('')}>Clear Search</button>
+        )}
+      </div>
+    );
   }
 
   return (
     <div className="transaction-history-widget">
       <div className="transaction-history-widget-inner">
-        <div>
-          <h4>Transaction History</h4>
-          <FilterButtons />
-          <div className="mb-2">
-            <Input
+        <div className="history-header">
+          <h4 className="history-title">Transaction History</h4>
+
+          <div className="history-filter-pills">
+            {filters.map(({ key, label, count }) => {
+              const isActive = filter === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`history-pill ${isActive ? 'is-active' : ''}`}
+                  onClick={() => setFilter(key)}
+                >
+                  <span>{label}</span>
+                  <span className="history-pill-count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="history-search-box">
+            <SearchOutlined className="history-search-icon" />
+            <input
               ref={searchInputRef}
+              className="history-search-input"
               placeholder="Search by wallet address..."
-              prefix={<SearchOutlined />}
               value={searchTerm}
               onChange={handleSearchChange}
-              size="large"
-              allowClear
             />
+            {searchTerm && (
+              <button
+                type="button"
+                className="history-search-clear"
+                onClick={handleClearSearch}
+                aria-label="Clear search"
+              >
+                <CloseOutlined />
+              </button>
+            )}
           </div>
         </div>
+
         {loading && transactions.length === 0 ? (
-          <div className="mt-5 text-center">
+          <div className="history-loading">
             <Spin
-              indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY }} />}
-              style={{ margin: "10px " }}
+              indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY, fontSize: 24 }} spin />}
             />
-            <div className="mt-2">Loading transaction history...</div>
+            <div className="history-loading-text">Loading transaction history...</div>
           </div>
         ) : (
           <>
             <div className="transaction-history-container">
               <TransactionList transactions={filteredTransactions} />
             </div>
-            <div className="d-flex justify-content-center mt-4">
+            <div className="history-pagination-wrap">
               <Pagination
                 current={page}
                 pageSize={15}

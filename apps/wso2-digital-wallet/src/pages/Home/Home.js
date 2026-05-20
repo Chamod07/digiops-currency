@@ -14,7 +14,6 @@ import {
 } from 'react';
 
 import {
-  Button,
   message,
   Spin,
 } from 'antd';
@@ -24,7 +23,6 @@ import { useNavigate } from 'react-router-dom';
 import { LoadingOutlined, SendOutlined, DownloadOutlined } from '@ant-design/icons';
 
 import RecentActivities from '../../components/Home/RecentActivities';
-import { COLORS } from '../../constants/colors';
 import {
   DEFAULT_WALLET_ADDRESS,
   STORAGE_KEYS,
@@ -35,12 +33,14 @@ import {
   ERROR_BRIDGE_NOT_READY,
   SEND,
   REQUEST,
-  SUCCESS,
   TOTAL_BALANCE,
-  WALLET_ADDRESS_COPIED,
-  OK
+  WSO2_TOKEN,
+  WSO2_WALLET,
+  CONNECTED,
+  CONNECTING,
+  OK,
 } from '../../constants/strings';
-import { showToast, showAlertBox } from '../../helpers/alerts';
+import { showAlertBox } from '../../helpers/alerts';
 import { getLocalDataAsync } from '../../helpers/storage';
 import { waitForBridge } from '../../helpers/bridge';
 import { useWalletBalance } from '../../services/query-hooks';
@@ -73,29 +73,24 @@ function Home() {
     }
   };
 
-  const [isAccountCopied, setIsAccountCopied] = useState(false);
   const { data: tokenBalance, isLoading: isTokenBalanceLoading, refetch } = useWalletBalance(walletAddress);
+  const hasValidAddress =
+    typeof walletAddress === 'string' &&
+    walletAddress.startsWith('0x') &&
+    walletAddress.length === 42;
 
   useEffect(() => {
     fetchWalletAddress();
   }, []);
 
   useEffect(() => {
-    if (walletAddress && 
-        walletAddress !== DEFAULT_WALLET_ADDRESS && 
-        walletAddress !== "0x" && 
+    if (walletAddress &&
+        walletAddress !== DEFAULT_WALLET_ADDRESS &&
+        walletAddress !== "0x" &&
         walletAddress.length === 42) {
       refetch();
     }
   }, [walletAddress, refetch]);
-
-  const handleCopyAccount = async () => {
-    showToast(SUCCESS, WALLET_ADDRESS_COPIED);
-    setIsAccountCopied(true);
-    setTimeout(() => {
-      setIsAccountCopied(false);
-    }, 2000);
-  };
 
   const handleSend = () => {
     navigate("/send");
@@ -112,27 +107,32 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletAddress]);
 
-  const refreshAllData = async () => {
-    await refetch();
-    recentActivitiesRef.current?.refreshTransactions();
-  };
-
   return (
-    <div className="home-container ">
+    <div className="home-container">
       {contextHolder}
-      <div className="wallet-balance-details mt-4">
-        <span className="total-balance-tag">{TOTAL_BALANCE}</span>
-        <span className="total-balance-value">
-          {isTokenBalanceLoading ? (
-            <Spin
-              indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY }} />}
-              style={{ margin: "10px " }}
-            />
-          ) : (
-            typeof tokenBalance === 'undefined' ? (
-              <span style={{ color: 'red', fontSize: 16 }}>
-                Error loading balance. <Button size="small" onClick={refetch}>Retry</Button>
-              </span>
+
+      <div className="wallet-hero">
+        <div className="wallet-hero-label">Connected Wallet</div>
+        <div className="wallet-hero-name">{WSO2_WALLET}</div>
+        <div className="wallet-hero-badge-row">
+          <span className={`hero-badge ${hasValidAddress ? 'is-connected' : 'is-connecting'}`}>
+            <span className="hero-badge-dot" />
+            <span className="hero-badge-text">
+              {hasValidAddress ? CONNECTED : CONNECTING}
+            </span>
+          </span>
+        </div>
+        <div className="hero-balance-label">{TOTAL_BALANCE}</div>
+        <div className="hero-balance-row">
+          <div className="hero-balance-amount">
+            {isTokenBalanceLoading ? (
+              <Spin
+                indicator={<LoadingOutlined style={{ color: '#ffffff', fontSize: 28 }} spin />}
+              />
+            ) : typeof tokenBalance === 'undefined' ? (
+              <button className="hero-balance-retry" onClick={refetch}>
+                Retry
+              </button>
             ) : (
               <NumericFormat
                 value={tokenBalance}
@@ -141,76 +141,29 @@ function Home() {
                 decimalScale={6}
                 fixedDecimalScale={false}
               />
-            )
-          )}
-        </span>
-        {/* <CopyToClipboard text={walletAddress} onCopy={handleCopyAccount}>
-          <Tooltip title={isAccountCopied ? "Copied" : "Copy to Clipboard"}>
-            <Tag className="total-balance-wallet-address mt-2">
-              {getEllipsisTxt(walletAddress, 13)}{" "}
-              {!isAccountCopied ? (
-                <CopyOutlined style={{ marginLeft: "5px" }} />
-              ) : (
-                <CheckOutlined style={{ marginLeft: "5px" }} />
-              )}
-            </Tag>
-          </Tooltip>
-        </CopyToClipboard> */}
-        <div className="action-buttons pt-3">
-          <div className="d-flex gap-2">
-            <Button 
-              className="primary-button" 
-              onClick={handleSend}
-              icon={<SendOutlined />}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                flex: 1
-              }}
-            >
-              {SEND}
-            </Button>
-            <Button 
-              className="default-button" 
-              onClick={handleReceive}
-              icon={<DownloadOutlined />}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                flex: 1
-              }}
-            >
-              {REQUEST}
-            </Button>
+            )}
           </div>
+          <div className="hero-balance-ticker">{WSO2_TOKEN}</div>
         </div>
-        {/* <div className="d-flex justify-content-between mt-4">
-          <div>
-            <div className="total-balance-icons mx-5">
-              <div style={{ marginTop: "-2px", marginBottom: "-2px" }}>
-                <DownloadOutlined
-                  style={{ fontSize: "18px", cursor: "pointer" }}
-                />
-              </div>
-            </div>
-            <div className="total-balance-action">{REQUEST}</div>
-          </div>
-          <div>
-            <div className="total-balance-icons">
-              <div style={{ marginTop: "-2px", marginBottom: "-2px" }}>
-                <WalletOutlined
-                  style={{ fontSize: "18px", cursor: "pointer" }}
-                />
-              </div>
-            </div>
-            <div className="total-balance-action">{BUY}</div>
-          </div>
-        </div> */}
       </div>
+
+      <div className="home-action-row">
+        <button
+          className="home-action-btn home-action-btn-primary"
+          onClick={handleSend}
+        >
+          <SendOutlined style={{ fontSize: 16 }} />
+          <span>{SEND}</span>
+        </button>
+        <button
+          className="home-action-btn home-action-btn-secondary"
+          onClick={handleReceive}
+        >
+          <DownloadOutlined style={{ fontSize: 16 }} />
+          <span>{REQUEST}</span>
+        </button>
+      </div>
+
       <RecentActivities ref={recentActivitiesRef} walletAddress={walletAddress} />
     </div>
   );

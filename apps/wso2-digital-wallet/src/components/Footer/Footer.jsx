@@ -5,9 +5,9 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import React from 'react';
+import './Footer.css';
 
-import { Layout } from 'antd';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
@@ -21,57 +21,63 @@ import {
   PROFILE,
   WALLET,
 } from '../../constants/strings';
-import { COLORS } from '../../constants/colors';
+import { waitForBridge } from '../../helpers/bridge';
+import { requestDeviceSafeAreaInsets } from '../../microapp-bridge';
+
+const NAV_ITEMS = [
+  { path: '/', label: WALLET, Icon: WalletOutlined },
+  { path: '/history', label: HISTORY, Icon: HistoryOutlined },
+  { path: '/profile', label: PROFILE, Icon: UserOutlined },
+];
+
+const MIN_BOTTOM_PADDING_PX = 8;
 
 const FooterBar = () => {
-
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { Footer } = Layout;
-  
-  const activeColor = COLORS.ORANGE_PRIMARY;
-  const inactiveColor = COLORS.GRAY_MEDIUM;
-
-  const getIconColor = (path) => {
-    return location.pathname === path ? activeColor : inactiveColor;
-  };
-
-  const handleHomeNavigation = () => {
-    navigate('/');
-  };
-
-  const handleNavigateHistory = () => {
-    navigate('/history');
-  }
-
-  const handleNavigateProfile = () => {
-    navigate('/profile');
-  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const ready = await waitForBridge();
+      if (!ready || cancelled) return;
+      requestDeviceSafeAreaInsets((data) => {
+        if (cancelled) return;
+        const bottom = data?.insets?.bottom;
+        if (typeof bottom === 'number') {
+          const value = Math.max(MIN_BOTTOM_PADDING_PX, bottom);
+          document.documentElement.style.setProperty(
+            '--safe-area-bottom',
+            `${value}px`
+          );
+        }
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
-    <Footer className="text-center" style={{ height: '85px', position: 'fixed', bottom: 0, width: '100%' }}>
-      <div className="d-flex justify-content-between">
-        <div className="d-flex flex-column">
-          <span className="footer-icons" onClick={handleHomeNavigation}>
-            <WalletOutlined style={{ fontSize: "20px", cursor: "pointer", color: getIconColor('/') }} />
-          </span>
-          <span className="footer-names" style={{ color: getIconColor('/') }}>{WALLET}</span>
-        </div>
-        <div className="d-flex flex-column">
-          <span className="footer-icons" onClick={handleNavigateHistory}>
-            <HistoryOutlined style={{ fontSize: "20px", cursor: "pointer", color: getIconColor('/history') }} />
-          </span>
-          <span className="footer-names" style={{ color: getIconColor('/history') }}>{HISTORY}</span>
-        </div>
-        <div className="d-flex flex-column">
-          <span className="footer-icons mx-2" onClick={handleNavigateProfile}>
-            <UserOutlined style={{ fontSize: "20px", cursor: "pointer", color: getIconColor('/profile') }} />
-          </span>
-          <span className="footer-names" style={{ color: getIconColor('/profile') }}>{PROFILE}</span>
-        </div>
-      </div>
-    </Footer>
+    <nav className="footer-nav" role="navigation" aria-label="Primary">
+      {NAV_ITEMS.map(({ path, label, Icon }) => {
+        const isActive = location.pathname === path;
+        return (
+          <button
+            key={path}
+            type="button"
+            className={`footer-nav-item ${isActive ? 'is-active' : ''}`}
+            onClick={() => navigate(path)}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <span className="footer-nav-icon">
+              <Icon style={{ fontSize: 22 }} />
+            </span>
+            <span className="footer-nav-label">{label}</span>
+          </button>
+        );
+      })}
+    </nav>
   );
 };
 

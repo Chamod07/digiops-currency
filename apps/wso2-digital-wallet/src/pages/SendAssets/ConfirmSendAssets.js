@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Avatar, Button } from "antd";
-import Wso2MainImg from "../../assets/images/wso2_main.png";
+import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./ConfirmSendAssets.css";
 import { getLocalDataAsync, saveLocalDataAsync } from "../../helpers/storage";
@@ -22,14 +22,12 @@ import {
   OK,
   SUCCESS,
   SUCCESS_TOKEN_TRANSFER,
-  WSO2_TOKEN
+  WSO2_TOKEN,
 } from "../../constants/strings";
 import { STORAGE_KEYS } from "../../constants/configs";
 import { showToast, showAlertBox } from "../../helpers/alerts";
 import { waitForBridge } from "../../helpers/bridge";
-import {
-  completeParkingPayment
-} from "../../helpers/parkingPaymentFlow";
+import { completeParkingPayment } from "../../helpers/parkingPaymentFlow";
 import { requestOpenMicroApp } from "../../microapp-bridge";
 
 function ConfirmSendAssets() {
@@ -45,13 +43,13 @@ function ConfirmSendAssets() {
   const fetchLocalTxDetails = async () => {
     try {
       const sendingAmount = await getLocalDataAsync(
-        STORAGE_KEYS.SENDING_AMOUNT
+        STORAGE_KEYS.SENDING_AMOUNT,
       );
       const senderWalletAddress = await getLocalDataAsync(
-        STORAGE_KEYS.SENDER_WALLET_ADDRESS
+        STORAGE_KEYS.SENDER_WALLET_ADDRESS,
       );
       const walletAddress = await getLocalDataAsync(
-        STORAGE_KEYS.WALLET_ADDRESS
+        STORAGE_KEYS.WALLET_ADDRESS,
       );
 
       setSendAmount(sendingAmount);
@@ -67,14 +65,14 @@ function ConfirmSendAssets() {
     const stateData = location?.state?.isParkingPaymentFlow
       ? {
           returnAppId: location?.state?.returnAppId,
-          returnRoute: location?.state?.returnRoute
+          returnRoute: location?.state?.returnRoute,
         }
       : null;
 
     if (stateData) {
       setParkingFlowData({
         returnAppId: stateData?.returnAppId || "",
-        returnRoute: stateData?.returnRoute || ""
+        returnRoute: stateData?.returnRoute || "",
       });
     }
   }, [location]);
@@ -92,7 +90,7 @@ function ConfirmSendAssets() {
         saveLocalDataAsync,
         requestOpenMicroApp,
         returnAppId: parkingFlowData.returnAppId,
-        returnRoute: parkingFlowData.returnRoute
+        returnRoute: parkingFlowData.returnRoute,
       });
       return;
     }
@@ -129,7 +127,7 @@ function ConfirmSendAssets() {
             saveLocalDataAsync,
             requestOpenMicroApp,
             returnAppId: parkingFlowData.returnAppId,
-            returnRoute: parkingFlowData.returnRoute
+            returnRoute: parkingFlowData.returnRoute,
           });
           setIsTransferLoading(false);
           return;
@@ -152,10 +150,13 @@ function ConfirmSendAssets() {
             saveLocalDataAsync,
             requestOpenMicroApp,
             returnAppId: parkingFlowData.returnAppId,
-            returnRoute: parkingFlowData.returnRoute
+            returnRoute: parkingFlowData.returnRoute,
           });
         } catch (parkingError) {
-          console.log("error while reporting parking payment failure", parkingError);
+          console.log(
+            "error while reporting parking payment failure",
+            parkingError,
+          );
         }
       }
 
@@ -183,20 +184,30 @@ function ConfirmSendAssets() {
           <div className="flow-item from-item">
             <div className="flow-details">
               <span className="flow-label">From</span>
-              <span className="flow-address">{getEllipsisTxt(fromAddress, 6)}</span>
+              <span className="flow-address">
+                {getEllipsisTxt(fromAddress, 6)}
+              </span>
             </div>
           </div>
-          
+
           <div className="flow-arrow">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8c8c8c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M5 12H19M19 12L12 5M19 12L12 19"
+                stroke="#8c8c8c"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
 
           <div className="flow-item to-item">
             <div className="flow-details">
               <span className="flow-label">To</span>
-              <span className="flow-address">{getEllipsisTxt(senderAddress, 6)}</span>
+              <span className="flow-address">
+                {getEllipsisTxt(senderAddress, 6)}
+              </span>
             </div>
           </div>
         </div>
@@ -216,11 +227,7 @@ function ConfirmSendAssets() {
         {/* Action Buttons */}
         <div className="button-group">
           {parkingFlowData ? null : (
-            <Button
-              className="default-button"
-              onClick={handleReject}
-              block
-            >
+            <Button className="default-button" onClick={handleReject} block>
               Cancel
             </Button>
           )}

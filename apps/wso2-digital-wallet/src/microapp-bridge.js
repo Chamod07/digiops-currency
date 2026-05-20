@@ -13,7 +13,8 @@ const TOPIC = {
   GET_LAUNCH_DATA: "get_launch_data",
   ALERT: "alert",
   CONFIRM_ALERT: "confirm_alert",
-  TOTP: "totp"
+  TOTP: "totp",
+  DEVICE_SAFE_AREA_INSETS: "device_safe_area_insets",
 };
 
 // Single-flight: `resolveToken` is one host-overwritten slot, so concurrent
@@ -218,6 +219,30 @@ export const requestGetLaunchData = (callback, failedToRespondCallback) => {
   } else {
     console.error("Native bridge is not available");
   }
+};
+
+/**
+ * Request the device's safe-area insets from the host SuperApp.
+ * Host invokes `resolveDeviceSafeAreaInsets` with `{ insets: { top, bottom, left, right } }`.
+ */
+export const requestDeviceSafeAreaInsets = (callback) => {
+  if (!window.nativebridge || !window.ReactNativeWebView) {
+    console.error("Native bridge is not available");
+    if (typeof callback === "function") callback();
+    return;
+  }
+
+  window.nativebridge.resolveDeviceSafeAreaInsets = (data) => {
+    try {
+      if (typeof callback === "function") callback(data);
+    } catch (e) {
+      console.error("Safe area insets callback failed", e);
+    }
+  };
+
+  window.ReactNativeWebView.postMessage(
+    JSON.stringify({ topic: TOPIC.DEVICE_SAFE_AREA_INSETS })
+  );
 };
 
 // Open another microapp through SuperApp bridge
