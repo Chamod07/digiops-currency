@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Avatar } from "antd";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightOutlined,
   HomeOutlined,
@@ -40,6 +41,7 @@ import { requestOpenMicroApp } from "../../microapp-bridge";
 function ConfirmSendAssets() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const [fromAddress, setFromAddress] = useState("");
   const [sendAmount, setSendAmount] = useState("");
@@ -129,6 +131,15 @@ function ConfirmSendAssets() {
       const receipt = await transferToken(senderAddress, sendAmount);
       if (receipt) {
         await resetInputFields();
+
+        if (fromAddress) {
+          queryClient.invalidateQueries({
+            queryKey: ["transactions", fromAddress],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["walletBalance", fromAddress],
+          });
+        }
 
         if (parkingFlowData) {
           await completeParkingPayment({
