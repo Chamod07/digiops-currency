@@ -24,13 +24,46 @@ import {
 import { waitForBridge } from '../../helpers/bridge';
 import { requestDeviceSafeAreaInsets } from '../../microapp-bridge';
 
+const WALLET_FLOW_PATHS = new Set([
+  '/',
+  '/send',
+  '/receive',
+  '/confirm-assets-send',
+]);
+
 const NAV_ITEMS = [
-  { path: '/', label: WALLET, Icon: WalletOutlined },
-  { path: '/history', label: HISTORY, Icon: HistoryOutlined },
-  { path: '/profile', label: PROFILE, Icon: UserOutlined },
+  {
+    path: '/',
+    label: WALLET,
+    Icon: WalletOutlined,
+    isActive: (pathname) => WALLET_FLOW_PATHS.has(pathname),
+  },
+  {
+    path: '/history',
+    label: HISTORY,
+    Icon: HistoryOutlined,
+    isActive: (pathname) => pathname === '/history',
+  },
+  {
+    path: '/profile',
+    label: PROFILE,
+    Icon: UserOutlined,
+    isActive: (pathname) => pathname === '/profile',
+  },
 ];
 
 const MIN_BOTTOM_PADDING_PX = 8;
+
+const isIOSDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  return (
+    navigator.platform === 'MacIntel' &&
+    typeof navigator.maxTouchPoints === 'number' &&
+    navigator.maxTouchPoints > 1
+  );
+};
 
 const FooterBar = () => {
   const navigate = useNavigate();
@@ -44,13 +77,15 @@ const FooterBar = () => {
       requestDeviceSafeAreaInsets((data) => {
         if (cancelled) return;
         const bottom = data?.insets?.bottom;
-        if (typeof bottom === 'number') {
-          const value = Math.max(MIN_BOTTOM_PADDING_PX, bottom);
-          document.documentElement.style.setProperty(
-            '--safe-area-bottom',
-            `${value}px`
-          );
-        }
+        if (typeof bottom !== 'number') return;
+        const honorReportedInset = isIOSDevice();
+        const value = honorReportedInset
+          ? Math.max(MIN_BOTTOM_PADDING_PX, bottom)
+          : MIN_BOTTOM_PADDING_PX;
+        document.documentElement.style.setProperty(
+          '--safe-area-bottom',
+          `${value}px`
+        );
       });
     })();
     return () => {
@@ -60,8 +95,8 @@ const FooterBar = () => {
 
   return (
     <nav className="footer-nav" role="navigation" aria-label="Primary">
-      {NAV_ITEMS.map(({ path, label, Icon }) => {
-        const isActive = location.pathname === path;
+      {NAV_ITEMS.map(({ path, label, Icon, isActive: matchActive }) => {
+        const isActive = matchActive(location.pathname);
         return (
           <button
             key={path}
