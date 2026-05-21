@@ -149,6 +149,7 @@ function Profile() {
     } catch (error) {
       console.log(`${ERROR_WHEN_LOGGING_OUT} - ${error}`);
     }
+    queryClient.clear();
     setIsLoggingOut(false);
     setIsLogoutModalOpen(false);
     navigate('/create-wallet');
