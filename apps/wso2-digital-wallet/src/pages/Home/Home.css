@@ -14,7 +14,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 68px - var(--safe-area-bottom, 8px));
+  height: calc(
+    100vh - 68px - var(--safe-area-top, 0px) - var(--topbar-height, 44px) -
+      var(--safe-area-bottom, 8px)
+  );
 }
 
 /* Hero card — dark gradient with subtle orange glow */
@@ -404,6 +407,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  padding-top: calc(var(--safe-area-top, 0px) + var(--topbar-height, 44px));
   width: 100vw;
   background-color: #FAFAF9;
   z-index: 999;
@@ -439,7 +443,9 @@
 }
 
 .history-page .transaction-history-widget {
-  height: calc(100vh - 80px);
+  height: calc(
+    100vh - 80px - var(--safe-area-top, 0px) - var(--topbar-height, 44px)
+  );
   margin-top: 0;
   flex: 1;
 }

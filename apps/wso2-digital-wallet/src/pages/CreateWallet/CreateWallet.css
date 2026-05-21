@@ -10,7 +10,9 @@
 /* ── CREATE / ONBOARD WALLET PAGE ──────────────────────────────── */
 
 .cw-page {
-  min-height: calc(100vh - 36px);
+  min-height: calc(
+    100vh - 36px - var(--safe-area-top, 0px) - var(--topbar-height, 44px)
+  );
   display: flex;
   flex-direction: column;
 }

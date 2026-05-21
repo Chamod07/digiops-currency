@@ -279,8 +279,6 @@ function Profile() {
       </Modal>
 
       <div className="profile-section">
-        <h2 className="profile-title">Profile</h2>
-
         <div className="profile-group-label">Wallet Keys</div>
         <div className="profile-card">
           <button

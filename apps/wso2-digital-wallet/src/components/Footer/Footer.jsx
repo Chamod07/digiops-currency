@@ -7,7 +7,7 @@
 
 import './Footer.css';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
@@ -21,8 +21,6 @@ import {
   PROFILE,
   WALLET,
 } from '../../constants/strings';
-import { waitForBridge } from '../../helpers/bridge';
-import { requestDeviceSafeAreaInsets } from '../../microapp-bridge';
 
 const WALLET_FLOW_PATHS = new Set([
   '/',
@@ -52,46 +50,9 @@ const NAV_ITEMS = [
   },
 ];
 
-const MIN_BOTTOM_PADDING_PX = 8;
-
-const isIOSDevice = () => {
-  if (typeof navigator === 'undefined') return false;
-  const ua = navigator.userAgent || '';
-  if (/iPad|iPhone|iPod/.test(ua)) return true;
-  return (
-    navigator.platform === 'MacIntel' &&
-    typeof navigator.maxTouchPoints === 'number' &&
-    navigator.maxTouchPoints > 1
-  );
-};
-
 const FooterBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const ready = await waitForBridge();
-      if (!ready || cancelled) return;
-      requestDeviceSafeAreaInsets((data) => {
-        if (cancelled) return;
-        const bottom = data?.insets?.bottom;
-        if (typeof bottom !== 'number') return;
-        const honorReportedInset = isIOSDevice();
-        const value = honorReportedInset
-          ? Math.max(MIN_BOTTOM_PADDING_PX, bottom)
-          : MIN_BOTTOM_PADDING_PX;
-        document.documentElement.style.setProperty(
-          '--safe-area-bottom',
-          `${value}px`
-        );
-      });
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   return (
     <nav className="footer-nav" role="navigation" aria-label="Primary">
