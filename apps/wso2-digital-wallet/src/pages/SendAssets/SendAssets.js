@@ -9,7 +9,6 @@ import React, { useEffect, useState } from "react";
 import { Avatar, message, Spin } from "antd";
 import {
   ArrowRightOutlined,
-  HomeOutlined,
   LoadingOutlined,
   QrcodeOutlined,
   SearchOutlined,
@@ -141,9 +140,21 @@ function SendAssets() {
     initializeParkingPaymentLaunch();
   }, [navigate]);
 
-  const handleHome = () => {
-    navigate("/");
-  };
+  // If the native scanner is dismissed without scanning, no bridge callback
+  // fires — reset the loading state when the WebView regains visibility.
+  useEffect(() => {
+    if (!isScanning) return;
+    let timeoutId;
+    const onVisibility = () => {
+      if (document.hidden) return;
+      timeoutId = setTimeout(() => setIsScanning(false), 600);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isScanning]);
 
   const handleSendAssetsNext = async () => {
     try {
@@ -304,15 +315,6 @@ function SendAssets() {
   return (
     <div className="send-page">
       {contextHolder}
-
-      <div className="send-breadcrumb">
-        <button type="button" className="send-breadcrumb-btn" onClick={handleHome}>
-          <HomeOutlined style={{ fontSize: 13 }} />
-          <span>Home</span>
-        </button>
-        <span className="send-breadcrumb-sep">›</span>
-        <span className="send-breadcrumb-current">Send Coins</span>
-      </div>
 
       <button
         type="button"

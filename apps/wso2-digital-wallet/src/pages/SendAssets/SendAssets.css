@@ -13,50 +13,6 @@
   padding: 4px 0 24px;
 }
 
-.send-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 24px 0;
-}
-
-.send-breadcrumb-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--orange-primary, #ff7300);
-  padding: 0;
-  letter-spacing: -0.1px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.send-breadcrumb-btn:focus {
-  outline: none;
-}
-
-.send-breadcrumb-btn:active {
-  opacity: 0.7;
-}
-
-.send-breadcrumb-sep {
-  font-size: 13px;
-  color: #9CA3AF;
-  line-height: 1;
-}
-
-.send-breadcrumb-current {
-  font-size: 13px;
-  font-weight: 600;
-  color: #9CA3AF;
-  letter-spacing: -0.1px;
-}
-
 .send-scan-btn {
   display: flex;
   align-items: center;
