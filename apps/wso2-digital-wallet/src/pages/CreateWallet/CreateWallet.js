@@ -108,7 +108,7 @@ function CreateWallet() {
         </div>
         <div className="cw-title">{WSO2_WALLET}</div>
         <div className="cw-subtitle">
-          Your secure gateway to the O2C blockchain ecosystem
+          Send, receive, and track your O2C.
         </div>
       </div>
 
