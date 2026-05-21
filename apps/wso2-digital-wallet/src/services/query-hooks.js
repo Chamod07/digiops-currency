@@ -5,27 +5,46 @@
 // herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 // You may not alter or remove any copyright or other notice from copies of this content.
 
-import { useQuery } from '@tanstack/react-query';
-import { getWalletBalanceByWalletAddress, getCurrentBlockNumber } from '../services/blockchain.service';
+import { useQuery } from "@tanstack/react-query";
+import {
+  getWalletBalanceByWalletAddress,
+  getCurrentBlockNumber,
+} from "../services/blockchain.service";
+import { getUserWalletAddresses } from "./wallet.service";
 
 export function useWalletBalance(walletAddress, options = {}) {
-  const isValidAddress = typeof walletAddress === 'string' && walletAddress.startsWith('0x') && walletAddress.length === 42;
+  const isValidAddress =
+    typeof walletAddress === "string" &&
+    walletAddress.startsWith("0x") &&
+    walletAddress.length === 42;
   return useQuery({
-    queryKey: ['walletBalance', walletAddress],
+    queryKey: ["walletBalance", walletAddress],
     queryFn: () => getWalletBalanceByWalletAddress(walletAddress),
     enabled: isValidAddress,
     staleTime: 30_000, // Data is considered fresh for 30 seconds; avoids refetching if still fresh
     retry: 2,
-    retryDelay: attemptIndex => 1000 * (attemptIndex + 1), // Wait 1s, then 2s between retries
+    retryDelay: (attemptIndex) => 1000 * (attemptIndex + 1), // Wait 1s, then 2s between retries
     ...options,
   });
 }
 
 export function useBlockNumber(options = {}) {
   return useQuery({
-    queryKey: ['blockNumber'],
+    queryKey: ["blockNumber"],
     queryFn: getCurrentBlockNumber,
     staleTime: 10_000, // Data is considered fresh for 10 seconds
+    ...options,
+  });
+}
+
+export function useUserWallets(walletAddress, options = {}) {
+  return useQuery({
+    queryKey: ["userWallets", walletAddress || ""],
+    queryFn: getUserWalletAddresses,
+    enabled: !!walletAddress,
+    staleTime: 1000 * 60,
+    retry: 2,
+    retryDelay: (attemptIndex) => 1000 * (attemptIndex + 1),
     ...options,
   });
 }

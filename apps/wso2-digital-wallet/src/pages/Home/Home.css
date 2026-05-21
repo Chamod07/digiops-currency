@@ -14,7 +14,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 68px - var(--safe-area-bottom, 8px));
+  height: calc(
+    100vh - 68px - var(--safe-area-top, 0px) - var(--topbar-height, 44px) -
+      var(--safe-area-bottom, 8px)
+  );
 }
 
 /* Hero card — dark gradient with subtle orange glow */
@@ -280,9 +283,22 @@
   margin-top: 12px;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
+}
+
+.pull-indicator {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  flex-shrink: 0;
+  transition: height 0.18s ease-out, opacity 0.18s ease-out;
 }
 
 /* ── TRANSACTION ITEM (shared component, used on Home + History) ── */
@@ -357,7 +373,7 @@
 
 .recent-activity-time {
   font-size: 11px;
-  color: #B8AFA8;
+  color: #78716C;
   text-align: left;
 }
 
@@ -391,6 +407,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  padding-top: calc(var(--safe-area-top, 0px) + var(--topbar-height, 44px));
   width: 100vw;
   background-color: #FAFAF9;
   z-index: 999;
@@ -426,7 +443,9 @@
 }
 
 .history-page .transaction-history-widget {
-  height: calc(100vh - 80px);
+  height: calc(
+    100vh - 80px - var(--safe-area-top, 0px) - var(--topbar-height, 44px)
+  );
   margin-top: 0;
   flex: 1;
 }
@@ -543,7 +562,7 @@
 }
 
 .history-search-input::placeholder {
-  color: #B8AFA8;
+  color: #78716C;
 }
 
 .history-search-input:focus {
@@ -645,7 +664,7 @@
 .history-filtered-note {
   margin-top: 12px;
   font-size: 12px;
-  color: #B8AFA8;
+  color: #78716C;
   text-align: center;
 }
 
@@ -748,27 +767,61 @@
 }
 
 .transaction-history-widget .ant-pagination .ant-pagination-disabled .ant-pagination-item-link {
-  color: #C4B9AC;
+  color: #9CA3AF;
+}
+
+.transaction-history-widget .ant-pagination .ant-pagination-jump-prev .ant-pagination-item-link,
+.transaction-history-widget .ant-pagination .ant-pagination-jump-next .ant-pagination-item-link {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 11px;
 }
 
 .transaction-history-widget .ant-pagination .ant-pagination-jump-prev .ant-pagination-item-container,
 .transaction-history-widget .ant-pagination .ant-pagination-jump-next .ant-pagination-item-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 
 .transaction-history-widget .ant-pagination .ant-pagination-jump-prev .ant-pagination-item-link-icon,
 .transaction-history-widget .ant-pagination .ant-pagination-jump-next .ant-pagination-item-link-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #1C1917;
+  font-size: 14px;
 }
 
 .transaction-history-widget .ant-pagination .ant-pagination-jump-prev .ant-pagination-item-ellipsis,
 .transaction-history-widget .ant-pagination .ant-pagination-jump-next .ant-pagination-item-ellipsis {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #9CA3AF;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  font-size: 14px;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  transform: none;
 }
 
 .bg-light {

@@ -13,21 +13,23 @@ import {
 } from 'react';
 
 import {
-  Button,
   Modal,
-  Spin,
 } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useNavigate } from 'react-router-dom';
 
 import {
   CheckOutlined,
   CopyOutlined,
+  DownOutlined,
   EyeOutlined,
   LoadingOutlined,
   LogoutOutlined,
   QrcodeOutlined,
   RightOutlined,
+  WalletOutlined,
+  WarningFilled,
 } from '@ant-design/icons';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -49,10 +51,8 @@ import {
   getLocalDataAsync,
   saveLocalDataAsync,
 } from '../../helpers/storage';
-import {
-  getUserWalletAddresses,
-  setWalletAsPrimary,
-} from '../../services/wallet.service';
+import { setWalletAsPrimary } from '../../services/wallet.service';
+import { useUserWallets } from '../../services/query-hooks';
 
 const formatWalletAddress = (addr) => {
   if (!addr) return '';
@@ -62,11 +62,16 @@ const formatWalletAddress = (addr) => {
 
 function Profile() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [walletAddress, setWalletAddress] = useState('');
   const [walletPrivateKey, setWalletPrivateKey] = useState('');
-  const [userWallets, setUserWallets] = useState([]);
-  const [isLoadingWallets, setIsLoadingWallets] = useState(true);
+
+  const {
+    data: userWallets = [],
+    isLoading: isLoadingWallets,
+    isError: isUserWalletsError,
+  } = useUserWallets(walletAddress);
 
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -74,6 +79,9 @@ function Profile() {
 
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isPrivateKeyModalOpen, setIsPrivateKeyModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isWalletsExpanded, setIsWalletsExpanded] = useState(false);
 
   const [isAddressCopied, setIsAddressCopied] = useState(false);
   const [isPrivateKeyCopied, setIsPrivateKeyCopied] = useState(false);
@@ -89,24 +97,15 @@ function Profile() {
     }
   };
 
-  const fetchUserWallets = async () => {
-    try {
-      setIsLoadingWallets(true);
-      const wallets = await getUserWalletAddresses();
-      setUserWallets(wallets);
-    } catch (error) {
-      console.log(`${ERROR_READING_WALLET_DETAILS} - ${error}`);
-      showAlertBox(ERROR, ERROR_READING_WALLET_DETAILS, OK);
-      setUserWallets([]);
-    } finally {
-      setIsLoadingWallets(false);
-    }
-  };
-
   useEffect(() => {
     fetchWalletDetails();
-    fetchUserWallets();
   }, []);
+
+  useEffect(() => {
+    if (isUserWalletsError) {
+      showAlertBox(ERROR, ERROR_READING_WALLET_DETAILS, OK);
+    }
+  }, [isUserWalletsError]);
 
   const handleCopyAddress = () => {
     showToast(SUCCESS, WALLET_ADDRESS_COPIED);
@@ -115,7 +114,7 @@ function Profile() {
   };
 
   const handleCopyPrivateKey = () => {
-    showToast(SUCCESS, `${WALLET_PRIVATE_KEY} copied!`);
+    showToast(SUCCESS, `${WALLET_PRIVATE_KEY} copied`);
     setIsPrivateKeyCopied(true);
     setTimeout(() => setIsPrivateKeyCopied(false), 2000);
   };
@@ -126,25 +125,33 @@ function Profile() {
     setIsSettingPrimary(true);
     try {
       await setWalletAsPrimary(selectedWallet.walletAddress);
-      showToast(SUCCESS, 'Successfully set as primary wallet');
-      await fetchUserWallets();
+      showToast(SUCCESS, 'Primary wallet updated');
+      await queryClient.invalidateQueries({ queryKey: ['userWallets'] });
       setIsWalletModalOpen(false);
       setSelectedWallet(null);
     } catch (error) {
       console.error('Error setting wallet as primary:', error);
-      showAlertBox(ERROR, 'Failed to set wallet as primary', OK);
+      showAlertBox(ERROR, "Couldn't set as primary wallet", OK);
     } finally {
       setIsSettingPrimary(false);
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await saveLocalDataAsync(STORAGE_KEYS.WALLET_ADDRESS, '');
       await saveLocalDataAsync(STORAGE_KEYS.PRIVATE_KEY, '');
     } catch (error) {
       console.log(`${ERROR_WHEN_LOGGING_OUT} - ${error}`);
     }
+    queryClient.clear();
+    setIsLoggingOut(false);
+    setIsLogoutModalOpen(false);
     navigate('/create-wallet');
   };
 
@@ -158,36 +165,70 @@ function Profile() {
         title="Wallet Details"
         centered
       >
-        {selectedWallet && (
-          <div>
-            <div className="profile-modal-address">{selectedWallet.walletAddress}</div>
-            <div className="profile-modal-meta">
-              Created on {new Date(selectedWallet.createdOn).toLocaleString()}
-            </div>
-            {selectedWallet.defaultWallet && (
-              <div className="profile-modal-tag-row">
-                <span className="profile-primary-tag">Primary</span>
+        {selectedWallet && (() => {
+          const isActive =
+            walletAddress &&
+            selectedWallet.walletAddress &&
+            selectedWallet.walletAddress.toLowerCase() ===
+              walletAddress.toLowerCase();
+          const isPrimary = selectedWallet.defaultWallet;
+          const showTagRow = isActive || isPrimary;
+          return (
+            <div className="profile-modal">
+              <div className="profile-modal-address">
+                {selectedWallet.walletAddress}
               </div>
-            )}
-            {!selectedWallet.defaultWallet && (
-              <div className="profile-modal-action">
-                <Button
-                  type="primary"
-                  disabled={isSettingPrimary}
-                  loading={isSettingPrimary}
+              <div className="profile-modal-meta">
+                Created on{' '}
+                {new Date(selectedWallet.createdOn).toLocaleString()}
+              </div>
+
+              {showTagRow && (
+                <div className="profile-modal-tag-row">
+                  {isActive && (
+                    <span className="profile-active-tag">Signed in</span>
+                  )}
+                  {isPrimary && (
+                    <span className="profile-primary-tag">Default</span>
+                  )}
+                </div>
+              )}
+
+              <div
+                className={`profile-modal-explainer ${isPrimary ? 'is-primary' : ''}`}
+              >
+                <div className="profile-modal-explainer-title">
+                  {isPrimary
+                    ? 'Your default wallet'
+                    : 'Not your default wallet'}
+                </div>
+                <div className="profile-modal-explainer-text">
+                  {isPrimary
+                    ? 'Your coin rewards will be received to your default wallet. If you need to change the default wallet, tap the required wallet and set it as default.'
+                    : 'Set this wallet as default to receive your coin rewards here.'}
+                </div>
+              </div>
+
+              {!isPrimary && (
+                <button
+                  type="button"
+                  className="profile-modal-primary-btn"
                   onClick={handleSetAsPrimary}
-                  style={{
-                    minWidth: '160px',
-                    backgroundColor: COLORS.ORANGE_PRIMARY,
-                    color: COLORS.WHITE,
-                  }}
+                  disabled={isSettingPrimary}
                 >
-                  Set as Primary
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+                  {isSettingPrimary ? (
+                    <LoadingOutlined style={{ fontSize: 14 }} spin />
+                  ) : (
+                    <CheckOutlined style={{ fontSize: 14 }} />
+                  )}
+                  <span>
+                    {isSettingPrimary ? 'Updating…' : 'Make this my default'}
+                  </span>
+                </button>
+              )}
+            </div>
+          );
+        })()}
       </Modal>
 
       {/* QR Code Modal */}
@@ -238,8 +279,6 @@ function Profile() {
       </Modal>
 
       <div className="profile-section">
-        <h2 className="profile-title">Profile</h2>
-
         <div className="profile-group-label">Wallet Keys</div>
         <div className="profile-card">
           <button
@@ -274,45 +313,131 @@ function Profile() {
         </div>
 
         <div className="profile-group-label">My Wallets</div>
-        {isLoadingWallets ? (
-          <div className="profile-wallets-loading">
-            <Spin
-              indicator={<LoadingOutlined style={{ color: COLORS.ORANGE_PRIMARY }} spin />}
-            />
-          </div>
-        ) : userWallets.length === 0 ? (
-          <div className="profile-wallets-empty">No wallets found.</div>
-        ) : (
-          <div className="profile-wallets">
-            {userWallets.map((wallet, idx) => (
+        {(() => {
+          const isActiveWallet = (w) =>
+            walletAddress &&
+            w.walletAddress &&
+            w.walletAddress.toLowerCase() === walletAddress.toLowerCase();
+          const activeWallet = userWallets.find(isActiveWallet);
+          const primaryWallet = userWallets.find((w) => w.defaultWallet);
+          const count = userWallets.length;
+          const summaryLabel = isLoadingWallets
+            ? 'Loading…'
+            : count === 0
+              ? 'No wallets found'
+              : `${count} wallet${count === 1 ? '' : 's'}`;
+          const summarySub = isLoadingWallets
+            ? 'Fetching your wallets'
+            : count === 0
+              ? 'Nothing to display yet'
+              : activeWallet
+                ? `Signed in as ${formatWalletAddress(activeWallet.walletAddress)}`
+                : primaryWallet
+                  ? `Default ${formatWalletAddress(primaryWallet.walletAddress)}`
+                  : 'Tap to view all';
+          const canExpand = !isLoadingWallets && count > 0;
+          const isOpen = canExpand && isWalletsExpanded;
+
+          return (
+            <div className="profile-card profile-wallets-card">
               <button
-                key={wallet.walletAddress + idx}
                 type="button"
-                className="profile-wallet-card"
-                onClick={() => {
-                  setSelectedWallet(wallet);
-                  setIsWalletModalOpen(true);
-                }}
+                className="profile-btn"
+                onClick={() =>
+                  canExpand && setIsWalletsExpanded((prev) => !prev)
+                }
+                disabled={!canExpand}
+                aria-expanded={isWalletsExpanded}
               >
-                <span className="profile-wallet-info">
-                  <span className="profile-wallet-addr">
-                    {formatWalletAddress(wallet.walletAddress)}
-                  </span>
-                  <span className="profile-wallet-date">
-                    Created {new Date(wallet.createdOn).toLocaleDateString()}
-                  </span>
+                <span className="profile-btn-icon neutral">
+                  {isLoadingWallets ? (
+                    <LoadingOutlined
+                      style={{ fontSize: 18, color: '#1C1917' }}
+                      spin
+                    />
+                  ) : (
+                    <WalletOutlined
+                      style={{ fontSize: 18, color: '#1C1917' }}
+                    />
+                  )}
                 </span>
-                {wallet.defaultWallet && (
-                  <span className="profile-primary-tag">Primary</span>
+                <span className="profile-btn-text">
+                  <span className="profile-btn-label">{summaryLabel}</span>
+                  <span className="profile-btn-sub">{summarySub}</span>
+                </span>
+                {canExpand && (
+                  <DownOutlined
+                    className="profile-btn-chevron"
+                    style={{
+                      transform: `rotate(${isWalletsExpanded ? 180 : 0}deg)`,
+                      transition: 'transform 0.25s ease',
+                    }}
+                  />
                 )}
               </button>
-            ))}
-          </div>
-        )}
+
+              <div
+                className={`profile-wallets-body ${isOpen ? 'is-open' : ''}`}
+                aria-hidden={!isOpen}
+              >
+                <div className="profile-wallets-body-inner">
+                  <div className="profile-wallets-legend">
+                    <div className="profile-wallets-legend-item">
+                      <span className="profile-primary-tag">Default</span>
+                      <span className="profile-wallets-legend-text">
+                        Where you receive rewards
+                      </span>
+                    </div>
+                    <div className="profile-wallets-legend-item">
+                      <span className="profile-active-tag">Signed in</span>
+                      <span className="profile-wallets-legend-text">
+                        Active on this device
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="profile-wallets-list">
+                    {userWallets.map((wallet, idx) => {
+                      const isActive = isActiveWallet(wallet);
+                      return (
+                        <button
+                          key={wallet.walletAddress + idx}
+                          type="button"
+                          className={`profile-wallet-row ${isActive ? 'is-active' : ''}`}
+                          onClick={() => {
+                            setSelectedWallet(wallet);
+                            setIsWalletModalOpen(true);
+                          }}
+                        >
+                          <span className="profile-wallet-info">
+                            <span className="profile-wallet-addr">
+                              {formatWalletAddress(wallet.walletAddress)}
+                            </span>
+                            <span className="profile-wallet-date">
+                              Created {new Date(wallet.createdOn).toLocaleDateString()}
+                            </span>
+                          </span>
+                          <span className="profile-wallet-tags">
+                            {isActive && (
+                              <span className="profile-active-tag">Signed in</span>
+                            )}
+                            {wallet.defaultWallet && (
+                              <span className="profile-primary-tag">Default</span>
+                            )}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="profile-logout">
           <div className="profile-card">
-            <button type="button" className="profile-btn" onClick={handleLogout}>
+            <button type="button" className="profile-btn" onClick={handleLogoutClick}>
               <span className="profile-btn-icon danger">
                 <LogoutOutlined style={{ fontSize: 18, color: '#EF4444' }} />
               </span>
@@ -323,6 +448,49 @@ function Profile() {
           </div>
         </div>
       </div>
+
+      <Modal
+        open={isLogoutModalOpen}
+        onCancel={() => !isLoggingOut && setIsLogoutModalOpen(false)}
+        footer={null}
+        title="Log out of your wallet?"
+        centered
+        maskClosable={!isLoggingOut}
+        closable={!isLoggingOut}
+      >
+        <div className="profile-logout-modal">
+          <div className="profile-logout-warning">
+            <WarningFilled style={{ color: '#EF4444', fontSize: 16, flexShrink: 0 }} />
+            <span className="profile-logout-warning-text">
+              You'll need your 12-word recovery phrase to log back in. Without it,
+              your funds can't be restored.
+            </span>
+          </div>
+          <div className="profile-logout-actions">
+            <button
+              type="button"
+              className="profile-logout-cancel"
+              onClick={() => setIsLogoutModalOpen(false)}
+              disabled={isLoggingOut}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="profile-logout-confirm"
+              onClick={handleConfirmLogout}
+              disabled={isLoggingOut}
+            >
+              {isLoggingOut ? (
+                <LoadingOutlined style={{ fontSize: 14 }} spin />
+              ) : (
+                <LogoutOutlined style={{ fontSize: 14 }} />
+              )}
+              <span>{isLoggingOut ? 'Logging out…' : LOGOUT}</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

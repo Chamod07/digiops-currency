@@ -7,20 +7,77 @@
 
 import { saveLocalData, getLocalData } from "../microapp-bridge";
 
-export function saveLocalDataAsync(key, value) {
-  return new Promise((resolve, reject) => {
-    const callback = () => resolve();
-    const failedToRespondCallback = (err) => reject(err);
+// Single-flight: `resolveGetLocalData` / `resolveSaveLocalData` are single
+// host-overwritten slots on `window.nativebridge`. Concurrent callers would
+// clobber each other, so we serialize requests through a FIFO queue.
 
-    saveLocalData(key, value, callback, failedToRespondCallback);
-  });
-}
+const getQueue = [];
+let getInFlight = false;
+
+const drainGetQueue = () => {
+  if (getQueue.length === 0) {
+    getInFlight = false;
+    return;
+  }
+  getInFlight = true;
+  const { key, resolve, reject } = getQueue.shift();
+  try {
+    getLocalData(
+      key,
+      (data) => {
+        resolve(data);
+        drainGetQueue();
+      },
+      (err) => {
+        reject(err);
+        drainGetQueue();
+      }
+    );
+  } catch (e) {
+    reject(e);
+    drainGetQueue();
+  }
+};
 
 export function getLocalDataAsync(key) {
   return new Promise((resolve, reject) => {
-    const callback = (data) => resolve(data);
-    const failedToRespondCallback = (err) => reject(err);
+    getQueue.push({ key, resolve, reject });
+    if (!getInFlight) drainGetQueue();
+  });
+}
 
-    getLocalData(key, callback, failedToRespondCallback);
+const saveQueue = [];
+let saveInFlight = false;
+
+const drainSaveQueue = () => {
+  if (saveQueue.length === 0) {
+    saveInFlight = false;
+    return;
+  }
+  saveInFlight = true;
+  const { key, value, resolve, reject } = saveQueue.shift();
+  try {
+    saveLocalData(
+      key,
+      value,
+      () => {
+        resolve();
+        drainSaveQueue();
+      },
+      (err) => {
+        reject(err);
+        drainSaveQueue();
+      }
+    );
+  } catch (e) {
+    reject(e);
+    drainSaveQueue();
+  }
+}
+
+export function saveLocalDataAsync(key, value) {
+  return new Promise((resolve, reject) => {
+    saveQueue.push({ key, value, resolve, reject });
+    if (!saveInFlight) drainSaveQueue();
   });
 }

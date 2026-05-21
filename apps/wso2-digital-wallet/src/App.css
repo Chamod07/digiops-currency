@@ -9,7 +9,16 @@
 
 :root {
   --orange-primary: #ff7300;
+  --safe-area-top: 0px;
   --safe-area-bottom: 8px;
+  --topbar-height: 52px;
+}
+
+/* Push AntD toast messages below the fixed TopBar (z-index 1100) so they
+   aren't visually hidden by it. */
+.ant-message {
+  top: calc(var(--safe-area-top, 0px) + var(--topbar-height, 52px) + 12px) !important;
+  z-index: 1200 !important;
 }
 
 .App {
@@ -202,6 +211,7 @@
   right: 0;
   top: 0;
   bottom: 0;
+  padding-top: calc(var(--safe-area-top, 0px) + var(--topbar-height, 44px));
   background: #FAFAF9;
 }
 

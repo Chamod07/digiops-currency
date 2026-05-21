@@ -118,8 +118,6 @@ function TransactionHistory({ walletAddress }) {
     <div className="transaction-history-widget">
       <div className="transaction-history-widget-inner">
         <div className="history-header">
-          <h4 className="history-title">Transaction History</h4>
-
           <div className="history-filter-pills">
             {filters.map(({ key, label, count }) => {
               const isActive = filter === key;

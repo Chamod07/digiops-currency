@@ -164,7 +164,11 @@ function Home() {
         </button>
       </div>
 
-      <RecentActivities ref={recentActivitiesRef} walletAddress={walletAddress} />
+      <RecentActivities
+        ref={recentActivitiesRef}
+        walletAddress={walletAddress}
+        onPullRefresh={refetch}
+      />
     </div>
   );
 }

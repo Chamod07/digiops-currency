@@ -1,4 +1,4 @@
-/* 
+/*
 // Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 //
 // This software is the property of WSO2 LLC. and its suppliers, if any.
@@ -7,284 +7,274 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 */
 
-.receive-coins-container {
-  min-height: calc(100vh - 150px);
-  padding-bottom: 100px;
+/* ── REQUEST COINS PAGE ─────────────────────────────────────────── */
+
+.receive-page {
+  padding: 4px 0 24px;
 }
 
-.receive-header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.receive-coins-container .back-button {
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 4px;
-}
-
-.receive-coins-container .back-button .anticon {
-  display: flex;
-  align-items: center;
-}
-
-.receive-header {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-/* Input Section */
-.receive-input-section {
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.receive-description {
-  text-align: center;
-  color: #6c757d;
-  font-size: 14px;
-  margin-bottom: 32px;
-  padding: 0 20px;
+/* Breadcrumb (Home › Request Coins) */
+/* Intro copy */
+.receive-intro {
+  padding: 16px 24px 0;
+  font-size: 13px;
   line-height: 1.5;
+  color: #78716C;
+  text-align: left;
 }
 
-.wallet-address-container {
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 24px;
+/* Form sections */
+.receive-form {
+  padding: 18px 24px 0;
 }
 
-.wallet-address-label {
-  font-size: 14px;
+.receive-field-label {
+  font-size: 11px;
   font-weight: 600;
-  color: #212529;
+  color: #78716C;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
   margin-bottom: 8px;
   text-align: left;
 }
 
-.wallet-address-helper {
-  font-size: 13px;
-  font-weight: 400;
-  color: #8c8c8c;
-  margin-bottom: 12px;
-  margin-left: 8px;
-  text-align: left;
-}
-
-.wallet-address-display {
-  width: 100%;
-  padding: 12px 16px;
-  background-color: #f8f9fa;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  color: #1a1a1a;
-  font-size: 14px;
-  font-family: 'Courier New', monospace;
-  white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  line-height: 1.5;
-  cursor: default;
-  user-select: text;
-  -webkit-overflow-scrolling: touch;
-}
-
-.amount-input-container {
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 32px;
-}
-
-.amount-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #212529;
-  margin-bottom: 12px;
-  text-align: left;
-}
-
-.amount-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 16px;
+/* Wallet address card */
+.receive-address-card {
   background: #ffffff;
-  transition: border-color 0.3s;
+  border: 1.5px solid #E5E0D8;
+  border-radius: 16px;
+  padding: 14px 16px;
 }
 
-.amount-input-wrapper:focus-within {
-  border-color: #ff7400;
+.receive-address-card-text {
+  font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  color: #1C1917;
+  word-break: break-all;
+  text-align: left;
+  letter-spacing: 0.2px;
+  line-height: 1.45;
 }
 
-.receive-coins-container .amount-input {
+.receive-hint {
+  font-size: 12px;
+  color: #78716C;
+  margin-top: 7px;
+  padding-left: 2px;
+  text-align: left;
+}
+
+/* Amount input — matches send page */
+.receive-amount-wrap {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #E5E0D8;
+  border-radius: 16px;
+  padding: 0 16px;
+  height: 64px;
+  transition: all 0.15s ease;
+}
+
+.receive-amount-wrap.is-focused {
+  border-color: var(--orange-primary, #ff7300);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.08);
+}
+
+.receive-amount-input {
   flex: 1;
-  border: none !important;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
   font-size: 28px;
-  font-weight: 600;
-  padding: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  font-weight: 700;
+  color: #1C1917;
+  letter-spacing: -0.8px;
+  padding: 0;
 }
 
-.receive-coins-container .amount-input .ant-input {
-  border: none !important;
-  font-size: 28px;
-  font-weight: 600;
-  padding: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+.receive-amount-input::placeholder {
+  color: #D1C9C0;
 }
 
-.receive-coins-container .amount-input .ant-input:focus {
-  box-shadow: none !important;
-}
-
-.receive-coins-container .currency-badge {
+.receive-ticker-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  font-weight: 600;
-  color: #212529;
-  margin-left: 12px;
+  gap: 6px;
+  background: #FFF7ED;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 20px;
+  padding: 5px 10px;
+  flex-shrink: 0;
 }
 
-.qr-code-info .currency-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 6px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  font-weight: 600;
-  color: #212529;
-  margin-left: 2px;
+.receive-ticker-pill-sm {
+  padding: 3px 8px;
 }
 
-.generate-qr-button {
-  width: 100%;
-  max-width: 400px;
-  height: 48px;
-  font-size: 16px;
-  font-weight: 600;
+.receive-ticker-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange-primary, #ff7300);
+  letter-spacing: 0.3px;
+}
+
+/* Primary action button */
+.receive-primary-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin: 28px 24px 0;
+  height: 54px;
+  width: calc(100% - 48px);
+  background: var(--orange-primary, #ff7300);
+  border: none;
+  border-radius: 18px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.28);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* QR Code Display Section */
-.qr-code-display {
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.receive-primary-btn:focus {
+  outline: none;
 }
 
-.qr-display-description {
-  text-align: center;
-  color: #6c757d;
+.receive-primary-btn:active:not(.is-disabled) {
+  transform: scale(0.98);
+}
+
+.receive-primary-btn.is-disabled,
+.receive-primary-btn:disabled {
+  background: #E5E0D8;
+  color: #78716C;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Inline variant — used in the QR-code action row */
+.receive-primary-btn-inline {
+  flex: 1.4;
+  margin: 0;
+  width: auto;
+  height: 52px;
   font-size: 14px;
-  margin-bottom: 24px;
-  padding: 0 10px;
-  line-height: 1.5;
 }
 
-.qr-code-section {
+/* QR card */
+.receive-qr-card {
+  margin: 18px 24px 0;
+  background: #ffffff;
+  border: 1.5px solid #E5E0D8;
+  border-radius: 20px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  max-width: 340px;
-  margin-bottom: 20px;
+  gap: 14px;
 }
 
-.qr-code-wrapper {
+.receive-qr-canvas {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 4px;
-  background: #ffffff;
-  border-radius: 12px;
-  margin-bottom: 16px;
 }
 
-.qr-code-info {
-  width: 100%;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 12px;
+.receive-qr-info {
+  background: #FAFAF9;
+  border: 1px solid #F0EDE8;
+  border-radius: 14px;
+  padding: 14px 16px;
 }
 
-.qr-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.qr-info-divider {
-  height: 1px;
-  background: #e0e0e0;
-  margin: 12px 0;
-}
-
-.qr-info-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #6c757d;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.qr-info-value-container {
+.receive-qr-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.qr-info-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: #212529;
-}
-
-.wallet-address-text {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 13px;
-  word-break: break-all;
-}
-
-/* Action Buttons */
-.qr-actions {
-  width: 100%;
-  max-width: 340px;
-}
-
-.action-buttons-row {
-  display: flex;
+  justify-content: space-between;
   gap: 12px;
 }
 
-.action-button {
+.receive-qr-row-stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+}
+
+.receive-qr-divider {
+  height: 1px;
+  background: #F0EDE8;
+  margin: 10px 0;
+}
+
+.receive-qr-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #78716C;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.receive-qr-amount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.receive-qr-amount-num {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1C1917;
+  letter-spacing: -0.4px;
+}
+
+.receive-qr-address {
+  font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Actions row (New QR + Share) */
+.receive-actions {
+  display: flex;
+  gap: 10px;
+  padding: 18px 24px 0;
+}
+
+.receive-secondary-btn {
   flex: 1;
-  height: 48px;
+  height: 52px;
+  background: #ffffff;
+  border: 1.5px solid #E5E0D8;
+  border-radius: 18px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1C1917;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-weight: 600;
-  border-radius: 8px;
-  font-size: 15px;
+  gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.receive-secondary-btn:focus {
+  outline: none;
+}
+
+.receive-secondary-btn:active {
+  background: #F0EDE8;
+  transform: scale(0.98);
 }

@@ -6,7 +6,14 @@
 // You may not alter or remove any copyright or other notice from copies of this content.
 
 import React, { useState, useEffect } from "react";
-import { Avatar, Button } from "antd";
+import { Avatar } from "antd";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowRightOutlined,
+  LoadingOutlined,
+  SendOutlined,
+  WarningFilled,
+} from "@ant-design/icons";
 import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./ConfirmSendAssets.css";
@@ -33,6 +40,7 @@ import { requestOpenMicroApp } from "../../microapp-bridge";
 function ConfirmSendAssets() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const [fromAddress, setFromAddress] = useState("");
   const [sendAmount, setSendAmount] = useState("");
@@ -54,7 +62,6 @@ function ConfirmSendAssets() {
 
       setSendAmount(sendingAmount);
       setSenderAddress(senderWalletAddress);
-
       setFromAddress(walletAddress);
     } catch (error) {
       console.log(`${ERROR_FETCHING_LOCAL_TX_DETAILS}: ${error}`);
@@ -81,6 +88,15 @@ function ConfirmSendAssets() {
     fetchLocalTxDetails();
   }, []);
 
+  const resetInputFields = async () => {
+    try {
+      await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, "");
+      await saveLocalDataAsync(STORAGE_KEYS.SENDER_WALLET_ADDRESS, "");
+    } catch (error) {
+      console.log(`${ERROR_RESETTING_TX_VALUES}: ${error}`);
+    }
+  };
+
   const handleReject = async () => {
     await resetInputFields();
     if (parkingFlowData) {
@@ -97,15 +113,6 @@ function ConfirmSendAssets() {
     navigate("/send");
   };
 
-  const resetInputFields = async () => {
-    try {
-      await saveLocalDataAsync(STORAGE_KEYS.SENDING_AMOUNT, "");
-      await saveLocalDataAsync(STORAGE_KEYS.SENDER_WALLET_ADDRESS, "");
-    } catch (error) {
-      console.log(`${ERROR_RESETTING_TX_VALUES}: ${error}`);
-    }
-  };
-
   const handleConfirm = async () => {
     try {
       const isBridgeReady = await waitForBridge();
@@ -119,6 +126,15 @@ function ConfirmSendAssets() {
       const receipt = await transferToken(senderAddress, sendAmount);
       if (receipt) {
         await resetInputFields();
+
+        if (fromAddress) {
+          queryClient.invalidateQueries({
+            queryKey: ["transactions", fromAddress],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["walletBalance", fromAddress],
+          });
+        }
 
         if (parkingFlowData) {
           await completeParkingPayment({
@@ -165,81 +181,84 @@ function ConfirmSendAssets() {
     }
   };
 
+  const isParkingFlow = !!parkingFlowData;
+
   return (
-    <div className="confirm-send-container">
-      <div className="confirm-header-section">
-        <span className="confirm-header">Review Transaction</span>
+    <div className="confirm-page">
+      <div className="confirm-hero">
+        <div className="confirm-hero-label">You're sending</div>
+        <div className="confirm-hero-amount">{sendAmount || "—"}</div>
+        <div className="confirm-hero-chip">
+          <Avatar size={22} src={Wso2MainImg} />
+          <span className="confirm-hero-chip-text">{WSO2_TOKEN}</span>
+        </div>
       </div>
 
-      <div className="confirm-content">
-        {/* Hero Amount Display */}
-        <div className="amount-hero">
-          <div className="amount-subtitle">You're sending</div>
-          <div className="amount-value">{sendAmount}</div>
-          <div className="amount-currency">{WSO2_TOKEN}</div>
-        </div>
-
-        {/* Transaction Flow - Compact Horizontal */}
-        <div className="transaction-flow">
-          <div className="flow-item from-item">
-            <div className="flow-details">
-              <span className="flow-label">From</span>
-              <span className="flow-address">
-                {getEllipsisTxt(fromAddress, 6)}
-              </span>
+      <div className="confirm-card">
+        <div className="confirm-from-to">
+          <div className="confirm-addr-blk">
+            <div className="confirm-addr-lbl">From</div>
+            <div className="confirm-addr-val">
+              {fromAddress ? getEllipsisTxt(fromAddress, 6) : "—"}
             </div>
           </div>
-
-          <div className="flow-arrow">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M5 12H19M19 12L12 5M19 12L12 19"
-                stroke="#8c8c8c"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <div className="confirm-arrow-sep">
+            <ArrowRightOutlined style={{ fontSize: 12, color: "#9CA3AF" }} />
           </div>
-
-          <div className="flow-item to-item">
-            <div className="flow-details">
-              <span className="flow-label">To</span>
-              <span className="flow-address">
-                {getEllipsisTxt(senderAddress, 6)}
-              </span>
+          <div className="confirm-addr-blk confirm-addr-blk-right">
+            <div className="confirm-addr-lbl">To</div>
+            <div className="confirm-addr-val">
+              {senderAddress ? getEllipsisTxt(senderAddress, 6) : "—"}
             </div>
           </div>
         </div>
 
-        {/* Total Section - Single Line */}
-        <div className="total-section">
-          <span className="total-label">Total</span>
-          <div className="total-amount-container">
-            <span className="total-amount">{sendAmount}</span>
-            <div className="currency-badge">
-              <Avatar size={24} src={Wso2MainImg} />
-              <span>{WSO2_TOKEN}</span>
+        <div className="confirm-total-row">
+          <span className="confirm-total-lbl">Total</span>
+          <div className="confirm-total-val">
+            <span className="confirm-total-num">{sendAmount || "—"}</span>
+            <div className="confirm-ticker-pill">
+              <Avatar size={20} src={Wso2MainImg} />
+              <span className="confirm-ticker-text">{WSO2_TOKEN}</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Action Buttons */}
-        <div className="button-group">
-          {parkingFlowData ? null : (
-            <Button className="default-button" onClick={handleReject} block>
-              Cancel
-            </Button>
-          )}
-          <Button
-            className="primary-button"
-            loading={isTransferLoading}
-            onClick={handleConfirm}
-            block
+      <div className="confirm-warn">
+        <WarningFilled style={{ color: "#F97316", fontSize: 16, flexShrink: 0 }} />
+        <span className="confirm-warn-text">
+          Crypto transactions are irreversible. Double-check the recipient
+          address before confirming.
+        </span>
+      </div>
+
+      <div className="confirm-actions">
+        {!isParkingFlow && (
+          <button
+            type="button"
+            className="confirm-cancel-btn"
+            onClick={handleReject}
+            disabled={isTransferLoading}
           >
-            Confirm & Send
-          </Button>
-        </div>
+            Cancel
+          </button>
+        )}
+        <button
+          type="button"
+          className={`confirm-primary-btn ${
+            isParkingFlow ? "confirm-primary-btn-full" : ""
+          }`}
+          onClick={handleConfirm}
+          disabled={isTransferLoading || !sendAmount || !senderAddress}
+        >
+          {isTransferLoading ? (
+            <LoadingOutlined style={{ fontSize: 16 }} spin />
+          ) : (
+            <SendOutlined style={{ fontSize: 14 }} />
+          )}
+          <span>{isTransferLoading ? "Sending..." : "Confirm & Send"}</span>
+        </button>
       </div>
     </div>
   );

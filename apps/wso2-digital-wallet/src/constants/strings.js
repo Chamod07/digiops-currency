@@ -36,52 +36,56 @@ export const LOGOUT = "Logout";
 // create wallet
 export const CREATE_A_NEW_WALLET = "Create a new wallet";
 export const RESTORE_EXISTING_WALLET = "Restore existing wallet";
-export const WALLET_ADDRESS_COPIED = "Your wallet address has been copied to clipboard";
+export const WALLET_ADDRESS_COPIED = "Wallet address copied to clipboard";
 
 // recover wallet
 export const RECOVER_WALLET = "Recover Wallet";
-export const RECOVER_WALLET_ERROR = "Error recovering wallet";
+export const RECOVER_WALLET_ERROR =
+  "Couldn't recover wallet. Check your recovery phrase and try again.";
 export const PASTE_PHRASE_HERE = "Paste your 12 words recovery phrase here";
 export const RECOVER_YOUR_WALLET = "Recover Your Wallet";
 export const SHOW_WALLET_ADDRESS = "Show Wallet Address";
 
 // Recovery Phrase
 export const RECOVERY_PHRASE = "Recovery Phrase";
-export const RECOVERY_PHRASE_WARNING_TEXT = "Write down this 12-word Secret Recovery Phrase and save it in a place that you trust and only you can access.";
+export const RECOVERY_PHRASE_WARNING_TEXT =
+  "Write down these 12 words and store them in a secure place where only you can access. Never share them.";
 export const WALLET_ADDRESS = "Public Wallet Address";
 export const WALLET_PRIVATE_KEY = "Private Wallet Key";
 export const CONTINUE = "Continue";
 export const COPY_TO_CLIPBOARD = "Copy to clipboard";
-export const PHRASE_COPIED = "Phrase copied!";
+export const PHRASE_COPIED = "Phrase copied";
 
 export const WALLET_SECURE_TIPS = [
   "Save in a password manager",
   "Store in a safe deposit box",
-  "Write down and store in multiple secret places"
+  "Write down and store in multiple secret places",
 ];
 
-export const CONFIRM_RECOVERY_PHRASE = "Have you securely stored your recovery phrase? This phrase is required to restore access to your wallet. It cannot be recovered if lost, and losing it may result in permanent loss of access to your wallet.";
+export const CONFIRM_RECOVERY_PHRASE =
+  "This phrase is the only way to recover your wallet. If you lose it, your funds cannot be recovered.";
 
 export const OK = "Ok";
-export const ERROR = "Oops!";
+export const ERROR = "Error";
 export const SUCCESS = "Success";
-export const COPIED = "Copied!";
+export const COPIED = "copied";
 
 //Error messages
-export const ERROR_RETRIEVE_WALLET_ADDRESS = "Can not retrieve wallet address";
-export const ERROR_RETRIEVE_PRIVATE_KEY = "Can not retrieve private key";
-export const ERROR_READING_WALLET_DETAILS = "Something went wrong while reading wallet details";
-export const ERROR_WHEN_LOGGING_OUT = "Error when logging out";
-export const ERROR_WHEN_COPPING_DATA = "Error when copying to clipboard";
-export const ERROR_FETCHING_LOCAL_TX_DETAILS = "Error when fetching local transactions details";
-export const ERROR_RESETTING_TX_VALUES = "Error when resetting tx values";
-export const ERROR_SAVING_TX_DETAILS = "Error when saving transaction details";
-export const ERROR_CREATING_WALLET = "Something went wrong when creating wallet. Please try again.";
-export const ERROR_TRANSFERRING_TOKEN = "Something went wrong when transferring coins. Please try again.";
+export const ERROR_RETRIEVE_WALLET_ADDRESS = "Couldn't load wallet address";
+export const ERROR_RETRIEVE_PRIVATE_KEY = "Couldn't load private key";
+export const ERROR_READING_WALLET_DETAILS = "Couldn't load wallet details";
+export const ERROR_WHEN_LOGGING_OUT = "Logout failed";
+export const ERROR_WHEN_COPPING_DATA = "Couldn't copy to clipboard";
+export const ERROR_FETCHING_LOCAL_TX_DETAILS =
+  "Couldn't load transaction details";
+export const ERROR_RESETTING_TX_VALUES = "Couldn't reset transaction values";
+export const ERROR_SAVING_TX_DETAILS = "Couldn't save transaction details";
+export const ERROR_CREATING_WALLET =
+  "Couldn't create wallet. Please try again.";
+export const ERROR_TRANSFERRING_TOKEN = "Transfer failed. Please try again.";
 
-export const ERROR_BRIDGE_NOT_READY =
-  "Bridge not ready, please try again later";
+export const ERROR_BRIDGE_NOT_READY = "Connection not ready. Please try again.";
 
 // Success messages
-export const SUCCESS_TOKEN_TRANSFER = "Coins have been transferred successfully!";
-export const SUCCESS_WALLET_CREATED = "Wallet has been created successfully!";
+export const SUCCESS_TOKEN_TRANSFER = "Coins sent successfully";
+export const SUCCESS_WALLET_CREATED = "Wallet created";
