@@ -7,8 +7,8 @@
 
 import { Layout } from "antd";
 import React, { useEffect, useState } from "react";
-import NavBar from "./components/NavBar/NavBar";
 import FooterBar from "./components/Footer/Footer";
+import TopBar from "./components/TopBar/TopBar";
 import Pages from "./pages/Pages";
 // import "./dark-theme.css";
 // import "./light-theme.css";
@@ -17,32 +17,30 @@ import {
   hydrateParkingLaunchDataFromBridge,
   peekParkingPaymentLaunchData,
 } from "./helpers/parkingPaymentFlow";
+import { waitForBridge } from "./helpers/bridge";
+import { requestDeviceSafeAreaInsets } from "./microapp-bridge";
+
+const MIN_BOTTOM_PADDING_PX = 8;
+
+const isIOSDevice = () => {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  return (
+    navigator.platform === "MacIntel" &&
+    typeof navigator.maxTouchPoints === "number" &&
+    navigator.maxTouchPoints > 1
+  );
+};
 
 function LayoutView() {
   const { Content } = Layout;
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isShowNavBar, setIsShowNavBar] = useState(false);
   const [isShowFooter, setIsShowFooter] = useState(false);
 
   useEffect(() => {
-    if (
-      location.pathname === "/" ||
-      location.pathname === "/create-wallet" ||
-      location.pathname === "/wallet-phrase" ||
-      location.pathname === "/recover-wallet" ||
-      location.pathname === "/history" ||
-      location.pathname === "/profile" ||
-      location.pathname === "/send" ||
-      location.pathname === "/receive" ||
-      location.pathname === "/confirm-assets-send"
-    ) {
-      setIsShowNavBar(false);
-    } else {
-      setIsShowNavBar(true);
-    }
-
     if (
       location.pathname === "/create-wallet" ||
       location.pathname === "/wallet-phrase" ||
@@ -75,12 +73,43 @@ function LayoutView() {
     };
   }, [location.pathname, navigate]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const ready = await waitForBridge();
+      if (!ready || cancelled) return;
+      requestDeviceSafeAreaInsets((data) => {
+        if (cancelled) return;
+        const top = data?.insets?.top;
+        const bottom = data?.insets?.bottom;
+
+        if (typeof top === "number") {
+          document.documentElement.style.setProperty(
+            "--safe-area-top",
+            `${Math.max(0, top)}px`,
+          );
+        }
+        if (typeof bottom === "number") {
+          const value = isIOSDevice()
+            ? Math.max(MIN_BOTTOM_PADDING_PX, bottom)
+            : MIN_BOTTOM_PADDING_PX;
+          document.documentElement.style.setProperty(
+            "--safe-area-bottom",
+            `${value}px`,
+          );
+        }
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="main-background">
       <div className="col-lg-3 col-md-3 col-sm-12">
+        <TopBar />
         <Layout className="main-layout">
-          {isShowNavBar ? <NavBar /> : <></>}
-
           <Layout className="site-layout">
             <Content className={`layout-content ${isShowFooter ? 'has-footer' : 'no-footer'}`}>
               <div className="mt-3 mx-auto">

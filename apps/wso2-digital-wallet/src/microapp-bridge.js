@@ -15,6 +15,7 @@ const TOPIC = {
   CONFIRM_ALERT: "confirm_alert",
   TOTP: "totp",
   DEVICE_SAFE_AREA_INSETS: "device_safe_area_insets",
+  NAVIGATE_TO_MY_APPS: "close_webview",
 };
 
 // Single-flight: `resolveToken` is one host-overwritten slot, so concurrent
@@ -216,6 +217,20 @@ export const requestGetLaunchData = (callback, failedToRespondCallback) => {
 
   if (typeof failedToRespondCallback === "function") {
     failedToRespondCallback("Native bridge is not available");
+  } else {
+    console.error("Native bridge is not available");
+  }
+};
+
+/**
+ * Ask the host SuperApp to close this microapp's WebView and return to its
+ * My Apps screen.
+ */
+export const requestNavigateToMyApps = () => {
+  if (window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({ topic: TOPIC.NAVIGATE_TO_MY_APPS })
+    );
   } else {
     console.error("Native bridge is not available");
   }
