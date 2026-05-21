@@ -15,6 +15,7 @@ import {
   EyeOutlined,
   LeftOutlined,
   LoadingOutlined,
+  SnippetsOutlined,
   UndoOutlined,
   WarningFilled,
 } from '@ant-design/icons';
@@ -93,6 +94,36 @@ export default function RecoverWallet() {
     }
   };
 
+  const handlePasteFromClipboard = async () => {
+    if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') {
+      messageApi.error("Clipboard isn't available. Paste into any box instead.");
+      return;
+    }
+    try {
+      const text = await navigator.clipboard.readText();
+      const words = text
+        .trim()
+        .split(/\s+/)
+        .filter((word) => word.length > 0);
+
+      if (words.length === 0) {
+        messageApi.error('Clipboard is empty');
+        return;
+      }
+      if (words.length !== PASS_PHRASE_LENGTH) {
+        messageApi.error(
+          `Clipboard has ${words.length} word${words.length === 1 ? '' : 's'}. Expected ${PASS_PHRASE_LENGTH}.`,
+        );
+        return;
+      }
+      fillAllWords(words);
+      showToast(SUCCESS, 'Phrase pasted');
+    } catch (e) {
+      console.error('Clipboard read failed:', e);
+      messageApi.error("Couldn't read clipboard. Paste into any box instead.");
+    }
+  };
+
   const handleRecover = () => {
     setLoading(true);
     setTimeout(async () => {
@@ -160,12 +191,23 @@ export default function RecoverWallet() {
         <p className="rw-subtitle">
           {walletRecovered
             ? 'Your wallet has been restored on this device.'
-            : 'Enter your 12-word recovery phrase in the correct order.'}
+            : 'Paste your 12-word recovery phrase below, or type each word in order.'}
         </p>
       </div>
 
       {!walletRecovered ? (
         <>
+          <div className="rw-paste-row">
+            <button
+              type="button"
+              className="rw-paste-btn"
+              onClick={handlePasteFromClipboard}
+            >
+              <SnippetsOutlined style={{ fontSize: 14 }} />
+              <span>Paste from clipboard</span>
+            </button>
+          </div>
+
           <div className="rw-seed-grid">
             {wordList.map((word, i) => (
               <div className="rw-seed-cell" key={i}>
