@@ -13,7 +13,6 @@ import {
   CheckOutlined,
   CopyOutlined,
   EyeOutlined,
-  LeftOutlined,
   LoadingOutlined,
   SnippetsOutlined,
   UndoOutlined,
@@ -149,10 +148,6 @@ export default function RecoverWallet() {
     }, 2000);
   };
 
-  const handleBack = () => {
-    navigate('/create-wallet');
-  };
-
   const handleContinue = () => {
     navigate('/');
   };
@@ -173,21 +168,7 @@ export default function RecoverWallet() {
     <div className="rw-page">
       {contextHolder}
 
-      {!walletRecovered && (
-        <button
-          type="button"
-          className="rw-back-btn"
-          onClick={handleBack}
-          aria-label="Back"
-        >
-          <LeftOutlined style={{ fontSize: 16, color: '#1C1917' }} />
-        </button>
-      )}
-
       <div className="rw-header">
-        <h1 className="rw-title">
-          {walletRecovered ? 'Wallet Recovered' : RECOVER_YOUR_WALLET}
-        </h1>
         <p className="rw-subtitle">
           {walletRecovered
             ? 'Your wallet has been restored on this device.'

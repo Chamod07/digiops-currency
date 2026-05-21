@@ -8,11 +8,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Avatar, message } from "antd";
 import {
-  HomeOutlined,
   QrcodeOutlined,
   ShareAltOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 import "./ReceiveCoins.css";
 import Wso2MainImg from "../../assets/images/pulse-orange.png";
 import { QRCodeSVG } from "qrcode.react";
@@ -21,7 +19,6 @@ import {
   ERROR_BRIDGE_NOT_READY,
   ERROR_RETRIEVE_WALLET_ADDRESS,
   GENERATE_QR_CODE,
-  RECEIVE_COINS_TITLE,
   SHARE_QR_CODE,
   WSO2_TOKEN,
 } from "../../constants/strings";
@@ -30,7 +27,6 @@ import { STORAGE_KEYS, DEFAULT_WALLET_ADDRESS } from "../../constants/configs";
 import { waitForBridge } from "../../helpers/bridge";
 
 function ReceiveCoins() {
-  const navigate = useNavigate();
   const qrCodeRef = useRef(null);
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -87,10 +83,6 @@ function ReceiveCoins() {
     initializeWallet();
     // eslint-disable-next-line
   }, []);
-
-  const handleHome = () => {
-    navigate("/");
-  };
 
   const handleGenerateQrCode = () => {
     if (!receiveAmount || parseFloat(receiveAmount) <= 0) {
@@ -205,19 +197,6 @@ function ReceiveCoins() {
   return (
     <div className="receive-page">
       {contextHolder}
-
-      <div className="receive-breadcrumb">
-        <button
-          type="button"
-          className="receive-breadcrumb-btn"
-          onClick={handleHome}
-        >
-          <HomeOutlined style={{ fontSize: 13 }} />
-          <span>Home</span>
-        </button>
-        <span className="receive-breadcrumb-sep">›</span>
-        <span className="receive-breadcrumb-current">{RECEIVE_COINS_TITLE}</span>
-      </div>
 
       {!showQrCode ? (
         <>

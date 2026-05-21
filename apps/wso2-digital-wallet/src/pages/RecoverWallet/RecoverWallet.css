@@ -15,32 +15,6 @@
   padding-bottom: 24px;
 }
 
-.rw-back-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: #F0EDE8;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin: 16px 24px 0;
-  flex-shrink: 0;
-  align-self: flex-start;
-  transition: all 0.15s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.rw-back-btn:focus {
-  outline: none;
-}
-
-.rw-back-btn:active {
-  transform: scale(0.93);
-  background: #E5E0D8;
-}
-
 .rw-header {
   padding: 12px 24px 0;
   text-align: left;
