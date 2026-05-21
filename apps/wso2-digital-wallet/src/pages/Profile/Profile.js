@@ -71,7 +71,7 @@ function Profile() {
     data: userWallets = [],
     isLoading: isLoadingWallets,
     isError: isUserWalletsError,
-  } = useUserWallets();
+  } = useUserWallets(walletAddress);
 
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
