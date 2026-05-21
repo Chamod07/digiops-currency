@@ -185,10 +185,10 @@ function Profile() {
               {showTagRow && (
                 <div className="profile-modal-tag-row">
                   {isActive && (
-                    <span className="profile-active-tag">Active</span>
+                    <span className="profile-active-tag">Signed in</span>
                   )}
                   {isPrimary && (
-                    <span className="profile-primary-tag">Primary</span>
+                    <span className="profile-primary-tag">Default</span>
                   )}
                 </div>
               )}
@@ -198,13 +198,13 @@ function Profile() {
               >
                 <div className="profile-modal-explainer-title">
                   {isPrimary
-                    ? 'Your default payment wallet'
-                    : 'Not your default payment wallet'}
+                    ? 'Your default wallet'
+                    : 'Not your default wallet'}
                 </div>
                 <div className="profile-modal-explainer-text">
                   {isPrimary
-                    ? 'Apps send your coins here by default. Anyone can still send directly to any of your wallet addresses.'
-                    : 'Apps send your coins to your primary wallet by default. Switch to receive them here instead.'}
+                    ? 'Your coin rewards will be received to your default wallet. If you need to change the default wallet, tap the required wallet and set it as default.'
+                    : 'Set this wallet as default to receive your coin rewards here.'}
                 </div>
               </div>
 
@@ -334,7 +334,7 @@ function Profile() {
               : activeWallet
                 ? `Signed in as ${formatWalletAddress(activeWallet.walletAddress)}`
                 : primaryWallet
-                  ? `Primary ${formatWalletAddress(primaryWallet.walletAddress)}`
+                  ? `Default ${formatWalletAddress(primaryWallet.walletAddress)}`
                   : 'Tap to view all';
           const canExpand = !isLoadingWallets && count > 0;
           const isOpen = canExpand && isWalletsExpanded;
@@ -384,15 +384,15 @@ function Profile() {
                 <div className="profile-wallets-body-inner">
                   <div className="profile-wallets-legend">
                     <div className="profile-wallets-legend-item">
-                      <span className="profile-primary-tag">Primary</span>
+                      <span className="profile-primary-tag">Default</span>
                       <span className="profile-wallets-legend-text">
-                        Where apps send your coins by default
+                        Where you receive rewards
                       </span>
                     </div>
                     <div className="profile-wallets-legend-item">
-                      <span className="profile-active-tag">Active</span>
+                      <span className="profile-active-tag">Signed in</span>
                       <span className="profile-wallets-legend-text">
-                        Signed in on this device
+                        Active on this device
                       </span>
                     </div>
                   </div>
@@ -420,10 +420,10 @@ function Profile() {
                           </span>
                           <span className="profile-wallet-tags">
                             {isActive && (
-                              <span className="profile-active-tag">Active</span>
+                              <span className="profile-active-tag">Signed in</span>
                             )}
                             {wallet.defaultWallet && (
-                              <span className="profile-primary-tag">Primary</span>
+                              <span className="profile-primary-tag">Default</span>
                             )}
                           </span>
                         </button>
