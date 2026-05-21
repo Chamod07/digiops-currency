@@ -59,8 +59,8 @@
   padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 14px;
+  margin-top: 18px;
 }
 
 .wp-key-row {
@@ -74,16 +74,16 @@
   color: #78716C;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   text-align: left;
 }
 
 .wp-key-btn {
   width: 100%;
-  height: 44px;
+  height: 48px;
   background: #ffffff;
   border: 1.5px solid #E5E0D8;
-  border-radius: 14px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,12 +205,12 @@
 }
 
 .wp-footer {
-  padding: 16px 24px 0;
+  padding: 24px 24px 0;
 }
 
 .wp-continue-btn {
   width: 100%;
-  height: 50px;
+  height: 54px;
   background: var(--orange-primary, #ff7300);
   border: none;
   border-radius: 18px;

@@ -107,7 +107,6 @@ function WalletPhrase(props) {
       {contextHolder}
 
       <div className="wp-header">
-        <h1 className="wp-title">{RECOVERY_PHRASE}</h1>
         <p className="wp-subtitle">Your new wallet has been created</p>
       </div>
 
