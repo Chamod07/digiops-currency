@@ -118,6 +118,30 @@ function WalletPhrase(props) {
         <span className="wp-danger-text">{RECOVERY_PHRASE_WARNING_TEXT}</span>
       </div>
 
+      <div className="wp-phrase-card">
+        <div className="wp-phrase-grid">
+          {phraseWords.map((word, i) => (
+            <div className="wp-phrase-cell" key={`${word}-${i}`}>
+              <span className="wp-phrase-num">{i + 1}</span>
+              <span className="wp-phrase-word">{word}</span>
+            </div>
+          ))}
+        </div>
+        <CopyToClipboard text={walletPhrase || ""} onCopy={handleCopyPhrase}>
+          <button
+            type="button"
+            className={`wp-copy-btn ${isPhraseCopied ? "is-copied" : ""}`}
+          >
+            {isPhraseCopied ? (
+              <CheckOutlined style={{ fontSize: 14 }} />
+            ) : (
+              <CopyOutlined style={{ fontSize: 14 }} />
+            )}
+            <span>{isPhraseCopied ? PHRASE_COPIED : COPY_TO_CLIPBOARD}</span>
+          </button>
+        </CopyToClipboard>
+      </div>
+
       <div className="wp-key-section">
         <div className="wp-key-row">
           <div className="wp-key-label">Public Wallet Address</div>
@@ -144,30 +168,6 @@ function WalletPhrase(props) {
             <span>Show Private Key</span>
           </button>
         </div>
-      </div>
-
-      <div className="wp-phrase-card">
-        <div className="wp-phrase-grid">
-          {phraseWords.map((word, i) => (
-            <div className="wp-phrase-cell" key={`${word}-${i}`}>
-              <span className="wp-phrase-num">{i + 1}</span>
-              <span className="wp-phrase-word">{word}</span>
-            </div>
-          ))}
-        </div>
-        <CopyToClipboard text={walletPhrase || ""} onCopy={handleCopyPhrase}>
-          <button
-            type="button"
-            className={`wp-copy-btn ${isPhraseCopied ? "is-copied" : ""}`}
-          >
-            {isPhraseCopied ? (
-              <CheckOutlined style={{ fontSize: 14 }} />
-            ) : (
-              <CopyOutlined style={{ fontSize: 14 }} />
-            )}
-            <span>{isPhraseCopied ? PHRASE_COPIED : COPY_TO_CLIPBOARD}</span>
-          </button>
-        </CopyToClipboard>
       </div>
 
       <div className="wp-footer">

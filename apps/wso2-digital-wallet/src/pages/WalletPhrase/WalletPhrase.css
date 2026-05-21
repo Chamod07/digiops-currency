@@ -12,11 +12,11 @@
 .wp-page {
   display: flex;
   flex-direction: column;
-  padding-bottom: 24px;
+  padding-bottom: 16px;
 }
 
 .wp-header {
-  padding: 8px 24px 0;
+  padding: 4px 24px 0;
   text-align: left;
 }
 
@@ -25,14 +25,14 @@
   font-weight: 700;
   color: #1C1917;
   letter-spacing: -0.6px;
-  margin: 0 0 6px;
+  margin: 0 0 4px;
 }
 
 .wp-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: #9CA3AF;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -40,11 +40,11 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin: 16px 24px 0;
+  margin: 12px 24px 0;
   background: #FEF2F2;
   border: 1px solid rgba(239, 68, 68, 0.22);
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 10px 12px;
 }
 
 .wp-danger-text {
@@ -56,11 +56,11 @@
 }
 
 .wp-key-section {
-  padding: 4px 24px 0;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .wp-key-row {
@@ -74,16 +74,16 @@
   color: #78716C;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-align: left;
 }
 
 .wp-key-btn {
   width: 100%;
-  height: 48px;
+  height: 44px;
   background: #ffffff;
   border: 1.5px solid #E5E0D8;
-  border-radius: 16px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,10 +121,10 @@
 }
 
 .wp-phrase-card {
-  margin: 18px 24px 0;
+  margin: 14px 24px 0;
   background: #1C1917;
-  border-radius: 22px;
-  padding: 20px;
+  border-radius: 20px;
+  padding: 16px;
   position: relative;
   overflow: hidden;
 }
@@ -148,7 +148,7 @@
 .wp-phrase-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
   position: relative;
   z-index: 1;
 }
@@ -159,7 +159,7 @@
   gap: 8px;
   background: rgba(255, 255, 255, 0.07);
   border-radius: 10px;
-  padding: 9px 11px;
+  padding: 7px 11px;
 }
 
 .wp-phrase-num {
@@ -191,7 +191,7 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--orange-primary, #ff7300);
-  padding: 14px 0 0;
+  padding: 10px 0 0;
   transition: color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -205,12 +205,12 @@
 }
 
 .wp-footer {
-  padding: 24px 24px 0;
+  padding: 16px 24px 0;
 }
 
 .wp-continue-btn {
   width: 100%;
-  height: 54px;
+  height: 50px;
   background: var(--orange-primary, #ff7300);
   border: none;
   border-radius: 18px;
