@@ -10,7 +10,6 @@ import { Avatar } from "antd";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightOutlined,
-  HomeOutlined,
   LoadingOutlined,
   SendOutlined,
   WarningFilled,
@@ -96,10 +95,6 @@ function ConfirmSendAssets() {
     } catch (error) {
       console.log(`${ERROR_RESETTING_TX_VALUES}: ${error}`);
     }
-  };
-
-  const handleHome = () => {
-    navigate("/");
   };
 
   const handleReject = async () => {
@@ -190,21 +185,6 @@ function ConfirmSendAssets() {
 
   return (
     <div className="confirm-page">
-      {!isParkingFlow && (
-        <div className="confirm-breadcrumb">
-          <button
-            type="button"
-            className="confirm-breadcrumb-btn"
-            onClick={handleHome}
-          >
-            <HomeOutlined style={{ fontSize: 13 }} />
-            <span>Home</span>
-          </button>
-          <span className="confirm-breadcrumb-sep">›</span>
-          <span className="confirm-breadcrumb-current">Review Transaction</span>
-        </div>
-      )}
-
       <div className="confirm-hero">
         <div className="confirm-hero-label">You're sending</div>
         <div className="confirm-hero-amount">{sendAmount || "—"}</div>
